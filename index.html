@@ -165,14 +165,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const TOKEN  = 'patavUncUZDPiATJz.f3523b6df883d634c3dfe74284077101d159f1f1ea9d2efe3ae73a50c52ef7f8';
-const BASE   = 'appvDPADk4RJx4TBl';
-const TABLE  = 'tblWbDiTi6CO1RFWY';
-const CONFIG = 'tblN4Njuym7ZSs356';
-const API    = `https://api.airtable.com/v0/${BASE}/${TABLE}`;
-const CFGAPI = `https://api.airtable.com/v0/${BASE}/${CONFIG}`;
-const HDR    = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
-
+const WORKER = 'https://jc-pipeline.jcarloscsva.workers.dev';
 let data = [], editId = null, currentFilter = 'all', sortKey = 'Date Applied', sortDir = -1;
 
 const statusStyle = {
@@ -190,7 +183,7 @@ async function checkAuth() {
   const btn = document.getElementById('auth-btn');
   btn.disabled = true; btn.textContent = 'Checking...';
   try {
-    const r = await fetch(`${CFGAPI}?filterByFormula={Key}="password"`, { headers: HDR });
+    const r = await fetch(`${WORKER}/api/config`);
     const d = await r.json();
     const record = d.records?.[0];
     if (record && record.fields['Value'] === val) {
@@ -214,8 +207,8 @@ async function loadData() {
   try {
     let all = [], offset = null;
     do {
-      const url = API + '?pageSize=100' + (offset ? '&offset=' + offset : '');
-      const r = await fetch(url, { headers: HDR });
+      const url = `${WORKER}/api/records?pageSize=100` + (offset ? '&offset=' + offset : '');
+      const r = await fetch(url);
       const d = await r.json();
       all = all.concat(d.records || []);
       offset = d.offset;
@@ -337,12 +330,12 @@ async function saveEntry() {
   btn.disabled = true; btn.textContent = 'Saving...';
   try {
     if (editId) {
-      const r = await fetch(`${API}/${editId}`, { method: 'PATCH', headers: HDR, body: JSON.stringify({ fields }) });
+      const r = await fetch(`${WORKER}/api/records/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
       const d = await r.json();
       const idx = data.findIndex(x => x.id === editId);
       data[idx] = { id: editId, ...d.fields };
     } else {
-      const r = await fetch(API, { method: 'POST', headers: HDR, body: JSON.stringify({ fields }) });
+      const r = await fetch(`${WORKER}/api/records`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
       const d = await r.json();
       data.unshift({ id: d.id, ...d.fields });
     }
@@ -354,7 +347,7 @@ async function saveEntry() {
 async function deleteEntry(id) {
   if (!confirm('Remove this entry?')) return;
   try {
-    await fetch(`${API}/${id}`, { method: 'DELETE', headers: HDR });
+    await fetch(`${WORKER}/api/records/${id}`, { method: 'DELETE' });
     data = data.filter(x => x.id !== id);
     render(); showToast('Entry removed');
   } catch(e) { alert('Error deleting. Please try again.'); }
