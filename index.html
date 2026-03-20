@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Job Pipeline</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F5F3EE; --surface: #FFFFFF; --border: #E2DDD4;
+    --text: #1A1916; --muted: #8C8880; --accent: #2D5BE3;
+    --s-applied: #E8F0FE; --s-applied-t: #1A3A9C;
+    --s-screening: #FFF3CD; --s-screening-t: #7A5000;
+    --s-interview: #E6F4EA; --s-interview-t: #1A5C2A;
+    --s-offer: #FCE8FF; --s-offer-t: #6B1A8A;
+    --s-rejected: #FEECEC; --s-rejected-t: #8A1A1A;
+    --s-no-answer: #F0EFED; --s-no-answer-t: #5C5A56;
+  }
+  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* AUTH */
+  #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
+  .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; }
+  .auth-box h1 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
+  .auth-box p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
+  .auth-box input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 3px; }
+  .auth-box input:focus { border-color: var(--accent); }
+  .auth-btn { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px; border: none; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; }
+  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .auth-error { font-size: 12px; color: #E24B4A; margin-top: 8px; display: none; }
+
+  /* APP */
+  #app { display: none; padding: 32px 24px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
+  h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
+  h1 span { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
+  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
+  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--muted); }
+  .stat strong { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text); display: block; }
+  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
+  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
+  .filter-btn.active, .filter-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
+  .add-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: none; background: var(--accent); color: #fff; cursor: pointer; margin-left: auto; transition: opacity 0.15s; }
+  .add-btn:hover { opacity: 0.85; }
+  .loading { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
+  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
+  thead th { text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); cursor: pointer; user-select: none; white-space: nowrap; }
+  thead th:hover { color: var(--text); }
+  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--bg); }
+  td { padding: 11px 14px; vertical-align: middle; }
+  .company { font-weight: 500; }
+  .role { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
+  .channel { font-size: 12px; color: var(--muted); }
+  .date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
+  .next { font-size: 12px; max-width: 160px; }
+  .recruiter-name { font-size: 12px; font-weight: 500; }
+  .recruiter-contact { font-size: 11px; color: var(--muted); }
+  .actions { display: flex; gap: 6px; }
+  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; cursor: pointer; font-size: 12px; color: var(--muted); transition: all 0.15s; }
+  .icon-btn:hover { background: var(--bg); color: var(--text); }
+  .icon-btn.del:hover { border-color: #E24B4A; color: #E24B4A; }
+  .empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+
+  /* MODAL */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
+  .overlay.open { display: flex; }
+  .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; border: 1px solid var(--border); margin: auto; }
+  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+  .field { margin-bottom: 14px; }
+  label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 5px; }
+  input, select, textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
+  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
+  .btn-cancel { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 16px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
+  .btn-save { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 20px; border-radius: 7px; border: none; background: var(--accent); color: #fff; cursor: pointer; }
+  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none; }
+  .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<!-- AUTH -->
+<div id="auth-screen">
+  <div class="auth-box">
+    <h1>Job Pipeline</h1>
+    <p>Enter your password to continue</p>
+    <input type="password" id="pwd-input" placeholder="••••••••">
+    <button class="auth-btn" id="auth-btn" onclick="checkAuth()">Access</button>
+    <div class="auth-error" id="auth-error">Incorrect password</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header>
+    <h1>Job Pipeline <span id="total-label">0 roles</span></h1>
+    <div class="stats">
+      <div class="stat"><strong id="st-active">0</strong>Active</div>
+      <div class="stat"><strong id="st-interview">0</strong>Interviews</div>
+      <div class="stat"><strong id="st-offer">0</strong>Offers</div>
+      <div class="stat"><strong id="st-week">0</strong>This week</div>
+    </div>
+  </header>
+  <div class="toolbar">
+    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+    <button class="filter-btn" onclick="setFilter('Applied',this)">Applied</button>
+    <button class="filter-btn" onclick="setFilter('Screening',this)">Screening</button>
+    <button class="filter-btn" onclick="setFilter('Interview',this)">Interview</button>
+    <button class="filter-btn" onclick="setFilter('Offer',this)">Offer</button>
+    <button class="filter-btn" onclick="setFilter('Rejected',this)">Rejected</button>
+    <button class="filter-btn" onclick="setFilter('No answer',this)">No answer</button>
+    <button class="add-btn" onclick="openModal()">+ Add role</button>
+  </div>
+  <div id="table-wrap"></div>
+</div>
+
+<!-- MODAL -->
+<div class="overlay" id="overlay" onclick="closeIfOutside(event)">
+  <div class="modal">
+    <h2 id="modal-title">Add role</h2>
+    <div class="row2">
+      <div class="field"><label>Company *</label><input id="f-company" placeholder="e.g. Salesforce"></div>
+      <div class="field"><label>Role *</label><input id="f-role" placeholder="e.g. Engagement Manager"></div>
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Status</label>
+        <select id="f-status">
+          <option>Applied</option><option>Screening</option><option>Interview</option>
+          <option>Offer</option><option>Rejected</option><option>No answer</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>Channel</label>
+        <select id="f-channel">
+          <option>LinkedIn</option><option>Recruiter</option><option>Direct</option>
+          <option>Referral</option><option>Job board</option><option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Date applied</label><input type="date" id="f-date"></div>
+      <div class="field"><label>Salary band</label><input id="f-salary" placeholder="e.g. 70–80k"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Recruiter name</label><input id="f-recruiter-name" placeholder="e.g. Sarah Johnson"></div>
+      <div class="field"><label>Recruiter contact</label><input id="f-recruiter-contact" placeholder="email, phone or LinkedIn"></div>
+    </div>
+    <div class="field"><label>Next step</label><input id="f-next" placeholder="e.g. Follow up on Friday"></div>
+    <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Impressions, links, context..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
+      <button class="btn-save" id="btn-save" onclick="saveEntry()">Save</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const TOKEN  = 'patavUncUZDPiATJz.f3523b6df883d634c3dfe74284077101d159f1f1ea9d2efe3ae73a50c52ef7f8';
+const BASE   = 'appvDPADk4RJx4TBl';
+const TABLE  = 'tblWbDiTi6CO1RFWY';
+const CONFIG = 'tblN4Njuym7ZSs356';
+const API    = `https://api.airtable.com/v0/${BASE}/${TABLE}`;
+const CFGAPI = `https://api.airtable.com/v0/${BASE}/${CONFIG}`;
+const HDR    = { 'Authorization': `Bearer ${TOKEN}`, 'Content-Type': 'application/json' };
+
+let data = [], editId = null, currentFilter = 'all', sortKey = 'Date Applied', sortDir = -1;
+
+const statusStyle = {
+  'Applied':   { bg: 'var(--s-applied)',   color: 'var(--s-applied-t)' },
+  'Screening': { bg: 'var(--s-screening)', color: 'var(--s-screening-t)' },
+  'Interview': { bg: 'var(--s-interview)', color: 'var(--s-interview-t)' },
+  'Offer':     { bg: 'var(--s-offer)',     color: 'var(--s-offer-t)' },
+  'Rejected':  { bg: 'var(--s-rejected)',  color: 'var(--s-rejected-t)' },
+  'No answer': { bg: 'var(--s-no-answer)', color: 'var(--s-no-answer-t)' },
+};
+
+async function checkAuth() {
+  const val = document.getElementById('pwd-input').value.trim();
+  if (!val) return;
+  const btn = document.getElementById('auth-btn');
+  btn.disabled = true; btn.textContent = 'Checking...';
+  try {
+    const r = await fetch(`${CFGAPI}?filterByFormula={Key}="password"`, { headers: HDR });
+    const d = await r.json();
+    const record = d.records?.[0];
+    if (record && record.fields['Value'] === val) {
+      document.getElementById('auth-screen').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      loadData();
+    } else {
+      document.getElementById('auth-error').style.display = 'block';
+      document.getElementById('pwd-input').value = '';
+      document.getElementById('pwd-input').focus();
+    }
+  } catch(e) {
+    document.getElementById('auth-error').textContent = 'Connection error. Try again.';
+    document.getElementById('auth-error').style.display = 'block';
+  }
+  btn.disabled = false; btn.textContent = 'Access';
+}
+
+async function loadData() {
+  document.getElementById('table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    let all = [], offset = null;
+    do {
+      const url = API + '?pageSize=100' + (offset ? '&offset=' + offset : '');
+      const r = await fetch(url, { headers: HDR });
+      const d = await r.json();
+      all = all.concat(d.records || []);
+      offset = d.offset;
+    } while (offset);
+    data = all.map(r => ({ id: r.id, ...r.fields }));
+    render();
+  } catch(e) {
+    document.getElementById('table-wrap').innerHTML = '<div class="loading">Error loading data.</div>';
+  }
+}
+
+function render() {
+  let rows = [...data];
+  if (currentFilter !== 'all') rows = rows.filter(r => r['Status'] === currentFilter);
+  rows.sort((a, b) => {
+    let av = a[sortKey] || '', bv = b[sortKey] || '';
+    return av < bv ? sortDir : av > bv ? -sortDir : 0;
+  });
+  const wrap = document.getElementById('table-wrap');
+  if (rows.length === 0) {
+    wrap.innerHTML = '<table><tbody><tr><td colspan="7"><div class="empty">No roles yet — hit "+ Add role" to start tracking.</div></td></tr></tbody></table>';
+  } else {
+    wrap.innerHTML = `<table>
+      <thead><tr>
+        <th onclick="sortBy('Company')">Company</th>
+        <th onclick="sortBy('Status')">Status</th>
+        <th onclick="sortBy('Channel')">Channel</th>
+        <th onclick="sortBy('Date Applied')">Date</th>
+        <th>Recruiter</th>
+        <th>Next step</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${rows.map(r => {
+        const s = statusStyle[r['Status']] || statusStyle['Applied'];
+        const dateStr = r['Date Applied'] ? new Date(r['Date Applied'] + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
+        return `<tr>
+          <td>
+            <div class="company">${esc(r['Company'] || '')}</div>
+            <div class="role">${esc(r['Role'] || '')}${r['Salary Band'] ? ' · ' + esc(r['Salary Band']) : ''}</div>
+          </td>
+          <td><span class="badge" style="background:${s.bg};color:${s.color}">${esc(r['Status'] || '')}</span></td>
+          <td><span class="channel">${esc(r['Channel'] || '')}</span></td>
+          <td><span class="date">${dateStr}</span></td>
+          <td>
+            <div class="recruiter-name">${esc(r['Recruiter Name'] || '')}</div>
+            <div class="recruiter-contact">${esc(r['Recruiter Contact'] || '')}</div>
+          </td>
+          <td><span class="next">${esc(r['Next Step'] || '')}</span></td>
+          <td>
+            <div class="actions">
+              <button class="icon-btn" onclick="openModal('${r.id}')">✎</button>
+              <button class="icon-btn del" onclick="deleteEntry('${r.id}')">✕</button>
+            </div>
+          </td>
+        </tr>`;
+      }).join('')}</tbody>
+    </table>`;
+  }
+  updateStats();
+}
+
+function updateStats() {
+  const now = new Date(), weekAgo = new Date(now - 7 * 86400000);
+  document.getElementById('total-label').textContent = data.length + ' role' + (data.length !== 1 ? 's' : '');
+  document.getElementById('st-active').textContent = data.filter(r => !['Rejected','No answer'].includes(r['Status'])).length;
+  document.getElementById('st-interview').textContent = data.filter(r => r['Status'] === 'Interview').length;
+  document.getElementById('st-offer').textContent = data.filter(r => r['Status'] === 'Offer').length;
+  document.getElementById('st-week').textContent = data.filter(r => r['Date Applied'] && new Date(r['Date Applied']) >= weekAgo).length;
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function openModal(id) {
+  editId = id || null;
+  document.getElementById('modal-title').textContent = editId ? 'Edit role' : 'Add role';
+  if (editId) {
+    const r = data.find(x => x.id === editId);
+    document.getElementById('f-company').value = r['Company'] || '';
+    document.getElementById('f-role').value = r['Role'] || '';
+    document.getElementById('f-status').value = r['Status'] || 'Applied';
+    document.getElementById('f-channel').value = r['Channel'] || 'LinkedIn';
+    document.getElementById('f-date').value = r['Date Applied'] || '';
+    document.getElementById('f-salary').value = r['Salary Band'] || '';
+    document.getElementById('f-recruiter-name').value = r['Recruiter Name'] || '';
+    document.getElementById('f-recruiter-contact').value = r['Recruiter Contact'] || '';
+    document.getElementById('f-next').value = r['Next Step'] || '';
+    document.getElementById('f-notes').value = r['Notes'] || '';
+  } else {
+    ['f-company','f-role','f-salary','f-recruiter-name','f-recruiter-contact','f-next','f-notes'].forEach(i => document.getElementById(i).value = '');
+    document.getElementById('f-status').value = 'Applied';
+    document.getElementById('f-channel').value = 'LinkedIn';
+    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('overlay').classList.add('open');
+  setTimeout(() => document.getElementById('f-company').focus(), 50);
+}
+
+function closeModal() { document.getElementById('overlay').classList.remove('open'); editId = null; }
+function closeIfOutside(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+
+async function saveEntry() {
+  const company = document.getElementById('f-company').value.trim();
+  const role = document.getElementById('f-role').value.trim();
+  if (!company || !role) { alert('Company and role are required.'); return; }
+  const fields = {
+    'Company': company, 'Role': role,
+    'Status': document.getElementById('f-status').value,
+    'Channel': document.getElementById('f-channel').value,
+    'Date Applied': document.getElementById('f-date').value || null,
+    'Salary Band': document.getElementById('f-salary').value.trim(),
+    'Recruiter Name': document.getElementById('f-recruiter-name').value.trim(),
+    'Recruiter Contact': document.getElementById('f-recruiter-contact').value.trim(),
+    'Next Step': document.getElementById('f-next').value.trim(),
+    'Notes': document.getElementById('f-notes').value.trim(),
+  };
+  const btn = document.getElementById('btn-save');
+  btn.disabled = true; btn.textContent = 'Saving...';
+  try {
+    if (editId) {
+      const r = await fetch(`${API}/${editId}`, { method: 'PATCH', headers: HDR, body: JSON.stringify({ fields }) });
+      const d = await r.json();
+      const idx = data.findIndex(x => x.id === editId);
+      data[idx] = { id: editId, ...d.fields };
+    } else {
+      const r = await fetch(API, { method: 'POST', headers: HDR, body: JSON.stringify({ fields }) });
+      const d = await r.json();
+      data.unshift({ id: d.id, ...d.fields });
+    }
+    render(); closeModal(); showToast(editId ? 'Entry updated' : 'Role added');
+  } catch(e) { alert('Error saving. Please try again.'); }
+  btn.disabled = false; btn.textContent = 'Save';
+}
+
+async function deleteEntry(id) {
+  if (!confirm('Remove this entry?')) return;
+  try {
+    await fetch(`${API}/${id}`, { method: 'DELETE', headers: HDR });
+    data = data.filter(x => x.id !== id);
+    render(); showToast('Entry removed');
+  } catch(e) { alert('Error deleting. Please try again.'); }
+}
+
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active'); render();
+}
+
+function sortBy(key) {
+  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
+  render();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkAuth(); });
+</script>
+</body>
+</html>
