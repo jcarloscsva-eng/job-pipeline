@@ -31,10 +31,20 @@
   .auth-error { font-size: 12px; color: #E24B4A; margin-top: 8px; display: none; }
 
   /* APP */
-  #app { display: none; padding: 32px 24px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 32px; flex-wrap: wrap; gap: 12px; }
-  h1 { font-size: 22px; font-weight: 500; letter-spacing: -0.3px; }
-  h1 span { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
+  #app { display: none; }
+
+  /* TABS */
+  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; }
+  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 14px 20px; border: none; background: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
+  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+  .tab-content { display: none; padding: 32px 24px; }
+  .tab-content.active { display: block; }
+
+  /* SHARED */
+  .page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
+  h2 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
+  h2 span { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
   .stats { display: flex; gap: 8px; flex-wrap: wrap; }
   .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--muted); }
   .stat strong { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text); display: block; }
@@ -43,6 +53,8 @@
   .filter-btn.active, .filter-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
   .add-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: none; background: var(--accent); color: #fff; cursor: pointer; margin-left: auto; transition: opacity 0.15s; }
   .add-btn:hover { opacity: 0.85; }
+  .search-input { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); outline: none; width: 180px; }
+  .search-input:focus { border-color: var(--accent); }
   .loading { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
   table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
   thead th { text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); cursor: pointer; user-select: none; white-space: nowrap; }
@@ -51,14 +63,16 @@
   tbody tr:last-child { border-bottom: none; }
   tbody tr:hover { background: var(--bg); }
   td { padding: 11px 14px; vertical-align: middle; }
-  .company { font-weight: 500; }
-  .role { color: var(--muted); font-size: 12px; margin-top: 2px; }
+  .co-name { font-weight: 500; }
+  .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
   .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
   .channel { font-size: 12px; color: var(--muted); }
-  .date { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .next { font-size: 12px; max-width: 160px; }
+  .date-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
   .recruiter-name { font-size: 12px; font-weight: 500; }
   .recruiter-contact { font-size: 11px; color: var(--muted); }
+  .revenue { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
+  .jobs-link { font-size: 12px; color: var(--accent); text-decoration: none; }
+  .jobs-link:hover { text-decoration: underline; }
   .actions { display: flex; gap: 6px; }
   .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; cursor: pointer; font-size: 12px; color: var(--muted); transition: all 0.15s; }
   .icon-btn:hover { background: var(--bg); color: var(--text); }
@@ -69,7 +83,7 @@
   .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
   .overlay.open { display: flex; }
   .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; border: 1px solid var(--border); margin: auto; }
-  .modal h2 { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
+  .modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
   .field { margin-bottom: 14px; }
   label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 5px; }
   input, select, textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
@@ -99,65 +113,112 @@
 
 <!-- APP -->
 <div id="app">
-  <header>
-    <h1>Job Pipeline <span id="total-label">0 roles</span></h1>
-    <div class="stats">
-      <div class="stat"><strong id="st-active">0</strong>Active</div>
-      <div class="stat"><strong id="st-interview">0</strong>Interviews</div>
-      <div class="stat"><strong id="st-offer">0</strong>Offers</div>
-      <div class="stat"><strong id="st-week">0</strong>This week</div>
-    </div>
-  </header>
-  <div class="toolbar">
-    <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
-    <button class="filter-btn" onclick="setFilter('Applied',this)">Applied</button>
-    <button class="filter-btn" onclick="setFilter('Screening',this)">Screening</button>
-    <button class="filter-btn" onclick="setFilter('Interview',this)">Interview</button>
-    <button class="filter-btn" onclick="setFilter('Offer',this)">Offer</button>
-    <button class="filter-btn" onclick="setFilter('Rejected',this)">Rejected</button>
-    <button class="filter-btn" onclick="setFilter('No answer',this)">No answer</button>
-    <button class="add-btn" onclick="openModal()">+ Add role</button>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('pipeline',this)">Pipeline</button>
+    <button class="tab-btn" onclick="switchTab('companies',this)">Companies</button>
   </div>
-  <div id="table-wrap"></div>
+
+  <!-- PIPELINE -->
+  <div class="tab-content active" id="tab-pipeline">
+    <div class="page-header">
+      <h2>Pipeline <span id="p-total">0 roles</span></h2>
+      <div class="stats">
+        <div class="stat"><strong id="st-active">0</strong>Active</div>
+        <div class="stat"><strong id="st-interview">0</strong>Interviews</div>
+        <div class="stat"><strong id="st-offer">0</strong>Offers</div>
+        <div class="stat"><strong id="st-week">0</strong>This week</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setFilter('p','all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('p','Applied',this)">Applied</button>
+      <button class="filter-btn" onclick="setFilter('p','Screening',this)">Screening</button>
+      <button class="filter-btn" onclick="setFilter('p','Interview',this)">Interview</button>
+      <button class="filter-btn" onclick="setFilter('p','Offer',this)">Offer</button>
+      <button class="filter-btn" onclick="setFilter('p','Rejected',this)">Rejected</button>
+      <button class="filter-btn" onclick="setFilter('p','No answer',this)">No answer</button>
+      <button class="add-btn" onclick="openModal('p')">+ Add role</button>
+    </div>
+    <div id="p-wrap"></div>
+  </div>
+
+  <!-- COMPANIES -->
+  <div class="tab-content" id="tab-companies">
+    <div class="page-header">
+      <h2>Companies <span id="c-total">0 companies</span></h2>
+      <div class="stats">
+        <div class="stat"><strong id="c-interesting">0</strong>Interesting</div>
+        <div class="stat"><strong id="c-contacted">0</strong>Contacted</div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <button class="filter-btn active" onclick="setFilter('c','all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('c','Interesting',this)">Interesting</button>
+      <button class="filter-btn" onclick="setFilter('c','Contacted',this)">Contacted</button>
+      <button class="filter-btn" onclick="setFilter('c','Discarded',this)">Discarded</button>
+      <input class="search-input" id="c-search" placeholder="Search..." oninput="renderC()">
+      <button class="add-btn" onclick="openModal('c')">+ Add company</button>
+    </div>
+    <div id="c-wrap"></div>
+  </div>
 </div>
 
-<!-- MODAL -->
-<div class="overlay" id="overlay" onclick="closeIfOutside(event)">
+<!-- PIPELINE MODAL -->
+<div class="overlay" id="p-overlay" onclick="if(event.target===this)closeModal('p-overlay')">
   <div class="modal">
-    <h2 id="modal-title">Add role</h2>
+    <h3 id="p-modal-title">Add role</h3>
     <div class="row2">
-      <div class="field"><label>Company *</label><input id="f-company" placeholder="e.g. Salesforce"></div>
-      <div class="field"><label>Role *</label><input id="f-role" placeholder="e.g. Engagement Manager"></div>
+      <div class="field"><label>Company *</label><input id="pf-company" placeholder="e.g. Salesforce"></div>
+      <div class="field"><label>Role *</label><input id="pf-role" placeholder="e.g. Engagement Manager"></div>
     </div>
     <div class="row2">
-      <div class="field">
-        <label>Status</label>
-        <select id="f-status">
-          <option>Applied</option><option>Screening</option><option>Interview</option>
-          <option>Offer</option><option>Rejected</option><option>No answer</option>
-        </select>
+      <div class="field"><label>Status</label>
+        <select id="pf-status"><option>Applied</option><option>Screening</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>No answer</option></select>
       </div>
-      <div class="field">
-        <label>Channel</label>
-        <select id="f-channel">
-          <option>LinkedIn</option><option>Recruiter</option><option>Direct</option>
-          <option>Referral</option><option>Job board</option><option>Other</option>
-        </select>
+      <div class="field"><label>Channel</label>
+        <select id="pf-channel"><option>LinkedIn</option><option>Recruiter</option><option>Direct</option><option>Referral</option><option>Job board</option><option>Other</option></select>
       </div>
     </div>
     <div class="row2">
-      <div class="field"><label>Date applied</label><input type="date" id="f-date"></div>
-      <div class="field"><label>Salary band</label><input id="f-salary" placeholder="e.g. 70–80k"></div>
+      <div class="field"><label>Date applied</label><input type="date" id="pf-date"></div>
+      <div class="field"><label>Salary band</label><input id="pf-salary" placeholder="e.g. 70–80k"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Recruiter name</label><input id="f-recruiter-name" placeholder="e.g. Sarah Johnson"></div>
-      <div class="field"><label>Recruiter contact</label><input id="f-recruiter-contact" placeholder="email, phone or LinkedIn"></div>
+      <div class="field"><label>Recruiter name</label><input id="pf-rname" placeholder="e.g. Sarah Johnson"></div>
+      <div class="field"><label>Recruiter contact</label><input id="pf-rcontact" placeholder="email, phone or LinkedIn"></div>
     </div>
-    <div class="field"><label>Next step</label><input id="f-next" placeholder="e.g. Follow up on Friday"></div>
-    <div class="field"><label>Notes</label><textarea id="f-notes" placeholder="Impressions, links, context..."></textarea></div>
+    <div class="field"><label>Next step</label><input id="pf-next" placeholder="e.g. Follow up on Friday"></div>
+    <div class="field"><label>Notes</label><textarea id="pf-notes"></textarea></div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal()">Cancel</button>
-      <button class="btn-save" id="btn-save" onclick="saveEntry()">Save</button>
+      <button class="btn-cancel" onclick="closeModal('p-overlay')">Cancel</button>
+      <button class="btn-save" id="p-save-btn" onclick="saveP()">Save</button>
+    </div>
+  </div>
+</div>
+
+<!-- COMPANIES MODAL -->
+<div class="overlay" id="c-overlay" onclick="if(event.target===this)closeModal('c-overlay')">
+  <div class="modal">
+    <h3 id="c-modal-title">Add company</h3>
+    <div class="row2">
+      <div class="field"><label>Company *</label><input id="cf-company" placeholder="e.g. HubSpot"></div>
+      <div class="field"><label>Sector</label><input id="cf-sector" placeholder="e.g. CRM"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>Revenue</label><input id="cf-revenue" placeholder="e.g. $2.6B"></div>
+      <div class="field"><label>Employees</label><input id="cf-employees" placeholder="e.g. 7400"></div>
+    </div>
+    <div class="row2">
+      <div class="field"><label>EMEA Presence</label><input id="cf-emea" placeholder="e.g. Dublin"></div>
+      <div class="field"><label>Status</label>
+        <select id="cf-status"><option value="">None</option><option>Interesting</option><option>Contacted</option><option>Discarded</option></select>
+      </div>
+    </div>
+    <div class="field"><label>Jobs URL</label><input id="cf-jobs" placeholder="https://..."></div>
+    <div class="field"><label>Notes</label><textarea id="cf-notes"></textarea></div>
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="closeModal('c-overlay')">Cancel</button>
+      <button class="btn-save" id="c-save-btn" onclick="saveC()">Save</button>
     </div>
   </div>
 </div>
@@ -165,16 +226,22 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const WORKER = 'https://jc-pipeline.jcarloscsva.workers.dev';
-let data = [], editId = null, currentFilter = 'all', sortKey = 'Date Applied', sortDir = -1;
+const W = 'https://jc-pipeline.jcarloscsva.workers.dev';
+let PD = [], CD = [];
+let pEditId = null, cEditId = null;
+let pFilter = 'all', cFilter = 'all';
+let pSortK = 'Date Applied', pSortD = -1;
+let cSortK = 'Revenue', cSortD = -1;
 
-const statusStyle = {
-  'Applied':   { bg: 'var(--s-applied)',   color: 'var(--s-applied-t)' },
-  'Screening': { bg: 'var(--s-screening)', color: 'var(--s-screening-t)' },
-  'Interview': { bg: 'var(--s-interview)', color: 'var(--s-interview-t)' },
-  'Offer':     { bg: 'var(--s-offer)',     color: 'var(--s-offer-t)' },
-  'Rejected':  { bg: 'var(--s-rejected)',  color: 'var(--s-rejected-t)' },
-  'No answer': { bg: 'var(--s-no-answer)', color: 'var(--s-no-answer-t)' },
+const PS = {
+  'Applied':   ['#E8F0FE','#1A3A9C'], 'Screening': ['#FFF3CD','#7A5000'],
+  'Interview': ['#E6F4EA','#1A5C2A'], 'Offer':     ['#FCE8FF','#6B1A8A'],
+  'Rejected':  ['#FEECEC','#8A1A1A'], 'No answer': ['#F0EFED','#5C5A56'],
+};
+const CS = {
+  'Interesting': ['#E8F0FE','#1A3A9C'],
+  'Contacted':   ['#E6F4EA','#1A5C2A'],
+  'Discarded':   ['#FEECEC','#8A1A1A'],
 };
 
 async function checkAuth() {
@@ -183,195 +250,264 @@ async function checkAuth() {
   const btn = document.getElementById('auth-btn');
   btn.disabled = true; btn.textContent = 'Checking...';
   try {
-    const r = await fetch(`${WORKER}/api/config`);
+    const r = await fetch(`${W}/api/config`);
     const d = await r.json();
-    const record = d.records?.[0];
-    if (record && record.fields['Value'] === val) {
+    if (d.records?.[0]?.fields['Value'] === val) {
       document.getElementById('auth-screen').style.display = 'none';
       document.getElementById('app').style.display = 'block';
-      loadData();
+      loadP(); loadC();
     } else {
       document.getElementById('auth-error').style.display = 'block';
       document.getElementById('pwd-input').value = '';
       document.getElementById('pwd-input').focus();
     }
   } catch(e) {
-    document.getElementById('auth-error').textContent = 'Connection error. Try again.';
+    document.getElementById('auth-error').textContent = 'Connection error.';
     document.getElementById('auth-error').style.display = 'block';
   }
   btn.disabled = false; btn.textContent = 'Access';
 }
 
-async function loadData() {
-  document.getElementById('table-wrap').innerHTML = '<div class="loading">Loading...</div>';
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-' + tab).classList.add('active');
+}
+
+async function loadP() {
+  document.getElementById('p-wrap').innerHTML = '<div class="loading">Loading...</div>';
   try {
     let all = [], offset = null;
     do {
-      const url = `${WORKER}/api/records?pageSize=100` + (offset ? '&offset=' + offset : '');
-      const r = await fetch(url);
-      const d = await r.json();
-      all = all.concat(d.records || []);
-      offset = d.offset;
-    } while (offset);
-    data = all.map(r => ({ id: r.id, ...r.fields }));
-    render();
-  } catch(e) {
-    document.getElementById('table-wrap').innerHTML = '<div class="loading">Error loading data.</div>';
-  }
+      const r = await fetch(`${W}/api/records?pageSize=100${offset?'&offset='+offset:''}`);
+      const d = await r.json(); all = all.concat(d.records||[]); offset = d.offset;
+    } while(offset);
+    PD = all.map(r => ({ id: r.id, ...r.fields })); renderP();
+  } catch(e) { document.getElementById('p-wrap').innerHTML = '<div class="loading">Error loading.</div>'; }
 }
 
-function render() {
-  let rows = [...data];
-  if (currentFilter !== 'all') rows = rows.filter(r => r['Status'] === currentFilter);
-  rows.sort((a, b) => {
-    let av = a[sortKey] || '', bv = b[sortKey] || '';
-    return av < bv ? sortDir : av > bv ? -sortDir : 0;
+async function loadC() {
+  document.getElementById('c-wrap').innerHTML = '<div class="loading">Loading...</div>';
+  try {
+    let all = [], offset = null;
+    do {
+      const r = await fetch(`${W}/api/companies?pageSize=100${offset?'&offset='+offset:''}`);
+      const d = await r.json(); all = all.concat(d.records||[]); offset = d.offset;
+    } while(offset);
+    CD = all.map(r => ({ id: r.id, ...r.fields })); renderC();
+  } catch(e) { document.getElementById('c-wrap').innerHTML = '<div class="loading">Error loading.</div>'; }
+}
+
+function renderP() {
+  let rows = [...PD];
+  if (pFilter !== 'all') rows = rows.filter(r => r['Status'] === pFilter);
+  rows.sort((a,b) => { let av=a[pSortK]||'',bv=b[pSortK]||''; return av<bv?pSortD:av>bv?-pSortD:0; });
+  const w = document.getElementById('p-wrap');
+  if (!rows.length) { w.innerHTML='<table><tbody><tr><td colspan="7"><div class="empty">No roles yet.</div></td></tr></tbody></table>'; }
+  else {
+    w.innerHTML = `<table><thead><tr>
+      <th onclick="sortP('Company')">Company</th><th onclick="sortP('Status')">Status</th>
+      <th onclick="sortP('Channel')">Channel</th><th onclick="sortP('Date Applied')">Date</th>
+      <th>Recruiter</th><th>Next step</th><th></th>
+    </tr></thead><tbody>${rows.map(r => {
+      const s = PS[r['Status']]||PS['Applied'];
+      const dt = r['Date Applied'] ? new Date(r['Date Applied']+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
+      return `<tr>
+        <td><div class="co-name">${esc(r['Company']||'')}</div><div class="sub">${esc(r['Role']||'')}${r['Salary Band']?' · '+esc(r['Salary Band']):''}</div></td>
+        <td><span class="badge" style="background:${s[0]};color:${s[1]}">${esc(r['Status']||'')}</span></td>
+        <td><span class="channel">${esc(r['Channel']||'')}</span></td>
+        <td><span class="date-cell">${dt}</span></td>
+        <td><div class="recruiter-name">${esc(r['Recruiter Name']||'')}</div><div class="recruiter-contact">${esc(r['Recruiter Contact']||'')}</div></td>
+        <td><span style="font-size:12px;max-width:160px;display:block">${esc(r['Next Step']||'')}</span></td>
+        <td><div class="actions">
+          <button class="icon-btn" onclick="openModal('p','${r.id}')">✎</button>
+          <button class="icon-btn del" onclick="delP('${r.id}')">✕</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
+  }
+  const now=new Date(), wa=new Date(now-7*86400000);
+  document.getElementById('p-total').textContent = PD.length+' role'+(PD.length!==1?'s':'');
+  document.getElementById('st-active').textContent = PD.filter(r=>!['Rejected','No answer'].includes(r['Status'])).length;
+  document.getElementById('st-interview').textContent = PD.filter(r=>r['Status']==='Interview').length;
+  document.getElementById('st-offer').textContent = PD.filter(r=>r['Status']==='Offer').length;
+  document.getElementById('st-week').textContent = PD.filter(r=>r['Date Applied']&&new Date(r['Date Applied'])>=wa).length;
+}
+
+function renderC() {
+  const q = (document.getElementById('c-search')?.value||'').toLowerCase();
+  let rows = [...CD];
+  if (cFilter !== 'all') rows = rows.filter(r => r['Status'] === cFilter);
+  if (q) rows = rows.filter(r => (r['Company']||'').toLowerCase().includes(q)||(r['Sector']||'').toLowerCase().includes(q));
+  rows.sort((a,b) => {
+    if (cSortK==='Revenue') { return (parseRev(a['Revenue'])-parseRev(b['Revenue']))*cSortD; }
+    let av=a[cSortK]||'',bv=b[cSortK]||''; return av<bv?cSortD:av>bv?-cSortD:0;
   });
-  const wrap = document.getElementById('table-wrap');
-  if (rows.length === 0) {
-    wrap.innerHTML = '<table><tbody><tr><td colspan="7"><div class="empty">No roles yet — hit "+ Add role" to start tracking.</div></td></tr></tbody></table>';
-  } else {
-    wrap.innerHTML = `<table>
-      <thead><tr>
-        <th onclick="sortBy('Company')">Company</th>
-        <th onclick="sortBy('Status')">Status</th>
-        <th onclick="sortBy('Channel')">Channel</th>
-        <th onclick="sortBy('Date Applied')">Date</th>
-        <th>Recruiter</th>
-        <th>Next step</th>
-        <th></th>
-      </tr></thead>
-      <tbody>${rows.map(r => {
-        const s = statusStyle[r['Status']] || statusStyle['Applied'];
-        const dateStr = r['Date Applied'] ? new Date(r['Date Applied'] + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' }) : '';
-        return `<tr>
-          <td>
-            <div class="company">${esc(r['Company'] || '')}</div>
-            <div class="role">${esc(r['Role'] || '')}${r['Salary Band'] ? ' · ' + esc(r['Salary Band']) : ''}</div>
-          </td>
-          <td><span class="badge" style="background:${s.bg};color:${s.color}">${esc(r['Status'] || '')}</span></td>
-          <td><span class="channel">${esc(r['Channel'] || '')}</span></td>
-          <td><span class="date">${dateStr}</span></td>
-          <td>
-            <div class="recruiter-name">${esc(r['Recruiter Name'] || '')}</div>
-            <div class="recruiter-contact">${esc(r['Recruiter Contact'] || '')}</div>
-          </td>
-          <td><span class="next">${esc(r['Next Step'] || '')}</span></td>
-          <td>
-            <div class="actions">
-              <button class="icon-btn" onclick="openModal('${r.id}')">✎</button>
-              <button class="icon-btn del" onclick="deleteEntry('${r.id}')">✕</button>
-            </div>
-          </td>
-        </tr>`;
-      }).join('')}</tbody>
-    </table>`;
+  const w = document.getElementById('c-wrap');
+  if (!rows.length) { w.innerHTML='<table><tbody><tr><td colspan="7"><div class="empty">No companies found.</div></td></tr></tbody></table>'; }
+  else {
+    w.innerHTML = `<table><thead><tr>
+      <th onclick="sortC('Company')">Company</th><th onclick="sortC('Sector')">Sector</th>
+      <th onclick="sortC('Revenue')">Revenue ↕</th><th onclick="sortC('Employees')">Employees</th>
+      <th>EMEA</th><th onclick="sortC('Status')">Status</th><th></th>
+    </tr></thead><tbody>${rows.map(r => {
+      const s = CS[r['Status']];
+      return `<tr>
+        <td>
+          <div class="co-name">${esc(r['Company']||'')}</div>
+          ${r['Jobs URL']?`<a class="jobs-link" href="${esc(r['Jobs URL'])}" target="_blank">Jobs ↗</a>`:''}
+        </td>
+        <td><span class="channel">${esc(r['Sector']||'')}</span></td>
+        <td><span class="revenue">${esc(r['Revenue']||'')}</span></td>
+        <td><span class="sub">${esc(r['Employees']||'')}</span></td>
+        <td><span class="sub">${esc(r['EMEA Presence']||'')}</span></td>
+        <td>${s?`<span class="badge" style="background:${s[0]};color:${s[1]}">${esc(r['Status'])}</span>`:''}</td>
+        <td><div class="actions">
+          <button class="icon-btn" onclick="openModal('c','${r.id}')">✎</button>
+          <button class="icon-btn del" onclick="delC('${r.id}')">✕</button>
+        </div></td>
+      </tr>`;
+    }).join('')}</tbody></table>`;
   }
-  updateStats();
+  document.getElementById('c-total').textContent = CD.length+' companies';
+  document.getElementById('c-interesting').textContent = CD.filter(r=>r['Status']==='Interesting').length;
+  document.getElementById('c-contacted').textContent = CD.filter(r=>r['Status']==='Contacted').length;
 }
 
-function updateStats() {
-  const now = new Date(), weekAgo = new Date(now - 7 * 86400000);
-  document.getElementById('total-label').textContent = data.length + ' role' + (data.length !== 1 ? 's' : '');
-  document.getElementById('st-active').textContent = data.filter(r => !['Rejected','No answer'].includes(r['Status'])).length;
-  document.getElementById('st-interview').textContent = data.filter(r => r['Status'] === 'Interview').length;
-  document.getElementById('st-offer').textContent = data.filter(r => r['Status'] === 'Offer').length;
-  document.getElementById('st-week').textContent = data.filter(r => r['Date Applied'] && new Date(r['Date Applied']) >= weekAgo).length;
+function parseRev(s) {
+  if (!s) return 0;
+  const m = s.match(/([\d.]+)([BMK]?)/i);
+  if (!m) return 0;
+  const n=parseFloat(m[1]),u=m[2].toUpperCase();
+  return u==='B'?n*1e9:u==='M'?n*1e6:u==='K'?n*1e3:n;
 }
 
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-function openModal(id) {
-  editId = id || null;
-  document.getElementById('modal-title').textContent = editId ? 'Edit role' : 'Add role';
-  if (editId) {
-    const r = data.find(x => x.id === editId);
-    document.getElementById('f-company').value = r['Company'] || '';
-    document.getElementById('f-role').value = r['Role'] || '';
-    document.getElementById('f-status').value = r['Status'] || 'Applied';
-    document.getElementById('f-channel').value = r['Channel'] || 'LinkedIn';
-    document.getElementById('f-date').value = r['Date Applied'] || '';
-    document.getElementById('f-salary').value = r['Salary Band'] || '';
-    document.getElementById('f-recruiter-name').value = r['Recruiter Name'] || '';
-    document.getElementById('f-recruiter-contact').value = r['Recruiter Contact'] || '';
-    document.getElementById('f-next').value = r['Next Step'] || '';
-    document.getElementById('f-notes').value = r['Notes'] || '';
+function openModal(type, id) {
+  if (type==='p') {
+    pEditId = id||null;
+    document.getElementById('p-modal-title').textContent = pEditId?'Edit role':'Add role';
+    const r = pEditId ? PD.find(x=>x.id===pEditId) : null;
+    document.getElementById('pf-company').value = r?.['Company']||'';
+    document.getElementById('pf-role').value = r?.['Role']||'';
+    document.getElementById('pf-status').value = r?.['Status']||'Applied';
+    document.getElementById('pf-channel').value = r?.['Channel']||'LinkedIn';
+    document.getElementById('pf-date').value = r?.['Date Applied']||new Date().toISOString().split('T')[0];
+    document.getElementById('pf-salary').value = r?.['Salary Band']||'';
+    document.getElementById('pf-rname').value = r?.['Recruiter Name']||'';
+    document.getElementById('pf-rcontact').value = r?.['Recruiter Contact']||'';
+    document.getElementById('pf-next').value = r?.['Next Step']||'';
+    document.getElementById('pf-notes').value = r?.['Notes']||'';
+    document.getElementById('p-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('pf-company').focus(),50);
   } else {
-    ['f-company','f-role','f-salary','f-recruiter-name','f-recruiter-contact','f-next','f-notes'].forEach(i => document.getElementById(i).value = '');
-    document.getElementById('f-status').value = 'Applied';
-    document.getElementById('f-channel').value = 'LinkedIn';
-    document.getElementById('f-date').value = new Date().toISOString().split('T')[0];
+    cEditId = id||null;
+    document.getElementById('c-modal-title').textContent = cEditId?'Edit company':'Add company';
+    const r = cEditId ? CD.find(x=>x.id===cEditId) : null;
+    document.getElementById('cf-company').value = r?.['Company']||'';
+    document.getElementById('cf-sector').value = r?.['Sector']||'';
+    document.getElementById('cf-revenue').value = r?.['Revenue']||'';
+    document.getElementById('cf-employees').value = r?.['Employees']||'';
+    document.getElementById('cf-emea').value = r?.['EMEA Presence']||'';
+    document.getElementById('cf-status').value = r?.['Status']||'';
+    document.getElementById('cf-jobs').value = r?.['Jobs URL']||'';
+    document.getElementById('cf-notes').value = r?.['Notes']||'';
+    document.getElementById('c-overlay').classList.add('open');
+    setTimeout(()=>document.getElementById('cf-company').focus(),50);
   }
-  document.getElementById('overlay').classList.add('open');
-  setTimeout(() => document.getElementById('f-company').focus(), 50);
 }
 
-function closeModal() { document.getElementById('overlay').classList.remove('open'); editId = null; }
-function closeIfOutside(e) { if (e.target === document.getElementById('overlay')) closeModal(); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
 
-async function saveEntry() {
-  const company = document.getElementById('f-company').value.trim();
-  const role = document.getElementById('f-role').value.trim();
-  if (!company || !role) { alert('Company and role are required.'); return; }
+async function saveP() {
+  const company=document.getElementById('pf-company').value.trim();
+  const role=document.getElementById('pf-role').value.trim();
+  if (!company||!role) { alert('Company and role are required.'); return; }
   const fields = {
-    'Company': company, 'Role': role,
-    'Status': document.getElementById('f-status').value,
-    'Channel': document.getElementById('f-channel').value,
-    'Date Applied': document.getElementById('f-date').value || null,
-    'Salary Band': document.getElementById('f-salary').value.trim(),
-    'Recruiter Name': document.getElementById('f-recruiter-name').value.trim(),
-    'Recruiter Contact': document.getElementById('f-recruiter-contact').value.trim(),
-    'Next Step': document.getElementById('f-next').value.trim(),
-    'Notes': document.getElementById('f-notes').value.trim(),
+    'Company':company,'Role':role,
+    'Status':document.getElementById('pf-status').value,
+    'Channel':document.getElementById('pf-channel').value,
+    'Date Applied':document.getElementById('pf-date').value||null,
+    'Salary Band':document.getElementById('pf-salary').value.trim(),
+    'Recruiter Name':document.getElementById('pf-rname').value.trim(),
+    'Recruiter Contact':document.getElementById('pf-rcontact').value.trim(),
+    'Next Step':document.getElementById('pf-next').value.trim(),
+    'Notes':document.getElementById('pf-notes').value.trim(),
   };
-  const btn = document.getElementById('btn-save');
-  btn.disabled = true; btn.textContent = 'Saving...';
+  const btn=document.getElementById('p-save-btn');
+  btn.disabled=true; btn.textContent='Saving...';
   try {
-    if (editId) {
-      const r = await fetch(`${WORKER}/api/records/${editId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
-      const d = await r.json();
-      const idx = data.findIndex(x => x.id === editId);
-      data[idx] = { id: editId, ...d.fields };
+    if (pEditId) {
+      const d=await (await fetch(`${W}/api/records/${pEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
+      PD[PD.findIndex(x=>x.id===pEditId)]={id:pEditId,...d.fields};
     } else {
-      const r = await fetch(`${WORKER}/api/records`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ fields }) });
-      const d = await r.json();
-      data.unshift({ id: d.id, ...d.fields });
+      const d=await (await fetch(`${W}/api/records`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
+      PD.unshift({id:d.id,...d.fields});
     }
-    render(); closeModal(); showToast(editId ? 'Entry updated' : 'Role added');
-  } catch(e) { alert('Error saving. Please try again.'); }
-  btn.disabled = false; btn.textContent = 'Save';
+    renderP(); closeModal('p-overlay'); showToast(pEditId?'Entry updated':'Role added');
+  } catch(e) { alert('Error saving.'); }
+  btn.disabled=false; btn.textContent='Save';
 }
 
-async function deleteEntry(id) {
-  if (!confirm('Remove this entry?')) return;
+async function saveC() {
+  const company=document.getElementById('cf-company').value.trim();
+  if (!company) { alert('Company name is required.'); return; }
+  const fields = {
+    'Company':company,
+    'Sector':document.getElementById('cf-sector').value.trim(),
+    'Revenue':document.getElementById('cf-revenue').value.trim(),
+    'Employees':document.getElementById('cf-employees').value.trim(),
+    'EMEA Presence':document.getElementById('cf-emea').value.trim(),
+    'Status':document.getElementById('cf-status').value,
+    'Jobs URL':document.getElementById('cf-jobs').value.trim(),
+    'Notes':document.getElementById('cf-notes').value.trim(),
+  };
+  const btn=document.getElementById('c-save-btn');
+  btn.disabled=true; btn.textContent='Saving...';
   try {
-    await fetch(`${WORKER}/api/records/${id}`, { method: 'DELETE' });
-    data = data.filter(x => x.id !== id);
-    render(); showToast('Entry removed');
-  } catch(e) { alert('Error deleting. Please try again.'); }
+    if (cEditId) {
+      const d=await (await fetch(`${W}/api/companies/${cEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
+      CD[CD.findIndex(x=>x.id===cEditId)]={id:cEditId,...d.fields};
+    } else {
+      const d=await (await fetch(`${W}/api/companies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
+      CD.unshift({id:d.id,...d.fields});
+    }
+    renderC(); closeModal('c-overlay'); showToast(cEditId?'Company updated':'Company added');
+  } catch(e) { alert('Error saving.'); }
+  btn.disabled=false; btn.textContent='Save';
 }
 
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active'); render();
+async function delP(id) {
+  if (!confirm('Remove this entry?')) return;
+  await fetch(`${W}/api/records/${id}`,{method:'DELETE'});
+  PD=PD.filter(x=>x.id!==id); renderP(); showToast('Entry removed');
 }
 
-function sortBy(key) {
-  if (sortKey === key) sortDir *= -1; else { sortKey = key; sortDir = 1; }
-  render();
+async function delC(id) {
+  if (!confirm('Remove this company?')) return;
+  await fetch(`${W}/api/companies/${id}`,{method:'DELETE'});
+  CD=CD.filter(x=>x.id!==id); renderC(); showToast('Company removed');
 }
+
+function setFilter(type,f,btn) {
+  if (type==='p') { pFilter=f; document.querySelectorAll('#tab-pipeline .filter-btn').forEach(b=>b.classList.remove('active')); renderP(); }
+  else { cFilter=f; document.querySelectorAll('#tab-companies .filter-btn').forEach(b=>b.classList.remove('active')); renderC(); }
+  btn.classList.add('active');
+}
+
+function sortP(k) { if(pSortK===k)pSortD*=-1; else{pSortK=k;pSortD=1;} renderP(); }
+function sortC(k) { if(cSortK===k)cSortD*=-1; else{cSortK=k;cSortD=-1;} renderC(); }
 
 function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-document.getElementById('pwd-input').addEventListener('keydown', e => { if (e.key === 'Enter') checkAuth(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeModal('p-overlay');closeModal('c-overlay');} });
+document.getElementById('pwd-input').addEventListener('keydown',e=>{ if(e.key==='Enter')checkAuth(); });
 </script>
 </body>
 </html>
