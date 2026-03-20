@@ -4,98 +4,374 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Job Pipeline</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600&family=Syne:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg: #F5F3EE; --surface: #FFFFFF; --border: #E2DDD4;
-    --text: #1A1916; --muted: #8C8880; --accent: #2D5BE3;
-    --s-applied: #E8F0FE; --s-applied-t: #1A3A9C;
-    --s-screening: #FFF3CD; --s-screening-t: #7A5000;
-    --s-interview: #E6F4EA; --s-interview-t: #1A5C2A;
-    --s-offer: #FCE8FF; --s-offer-t: #6B1A8A;
-    --s-rejected: #FEECEC; --s-rejected-t: #8A1A1A;
-    --s-no-answer: #F0EFED; --s-no-answer-t: #5C5A56;
-  }
-  body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 
-  /* AUTH */
-  #auth-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 24px; }
-  .auth-box { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 40px 36px; width: 100%; max-width: 360px; text-align: center; }
-  .auth-box h1 { font-size: 20px; font-weight: 500; margin-bottom: 6px; }
-  .auth-box p { font-size: 13px; color: var(--muted); margin-bottom: 24px; }
-  .auth-box input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg); color: var(--text); outline: none; margin-bottom: 12px; text-align: center; letter-spacing: 3px; }
-  .auth-box input:focus { border-color: var(--accent); }
-  .auth-btn { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; padding: 10px; border: none; border-radius: 8px; background: var(--accent); color: #fff; cursor: pointer; }
-  .auth-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .auth-error { font-size: 12px; color: #E24B4A; margin-top: 8px; display: none; }
+:root{
+  --sage:    #7C9A8E;
+  --sage-lt: #EAF2EF;
+  --sage-md: #C4DBD4;
+  --rose:    #C97B7B;
+  --rose-lt: #FAEEEE;
+  --amber:   #C9A46B;
+  --amber-lt:#FBF3E6;
+  --sky:     #6B8FC9;
+  --sky-lt:  #EBF1FB;
+  --plum:    #9B7BC9;
+  --plum-lt: #F2EDFB;
+  --slate:   #6B7B8C;
+  --slate-lt:#EEF1F4;
 
-  /* APP */
-  #app { display: none; }
+  --bg:      #F7F6F3;
+  --surface: #FFFFFF;
+  --border:  #E4E1DA;
+  --border2: #D0CCC3;
+  --text:    #1E1C18;
+  --text2:   #6B6760;
+  --text3:   #A09C95;
 
-  /* TABS */
-  .tab-bar { display: flex; border-bottom: 1px solid var(--border); background: var(--surface); padding: 0 24px; }
-  .tab-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 14px 20px; border: none; background: none; color: var(--muted); cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.15s; }
-  .tab-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
-  .tab-btn:hover:not(.active) { color: var(--text); }
-  .tab-content { display: none; padding: 32px 24px; }
-  .tab-content.active { display: block; }
+  --radius:  10px;
+  --radius-lg: 16px;
+  --shadow:  0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.04);
+  --shadow-md: 0 2px 8px rgba(0,0,0,.08), 0 8px 24px rgba(0,0,0,.06);
+}
 
-  /* SHARED */
-  .page-header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 24px; flex-wrap: wrap; gap: 12px; }
-  h2 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
-  h2 span { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 400; color: var(--muted); margin-left: 10px; }
-  .stats { display: flex; gap: 8px; flex-wrap: wrap; }
-  .stat { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; color: var(--muted); }
-  .stat strong { font-family: 'DM Mono', monospace; font-size: 15px; font-weight: 500; color: var(--text); display: block; }
-  .toolbar { display: flex; gap: 8px; margin-bottom: 16px; flex-wrap: wrap; align-items: center; }
-  .filter-btn { font-family: 'DM Sans', sans-serif; font-size: 12px; padding: 5px 12px; border-radius: 20px; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: all 0.15s; }
-  .filter-btn.active, .filter-btn:hover { background: var(--text); color: #fff; border-color: var(--text); }
-  .add-btn { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 16px; border-radius: 8px; border: none; background: var(--accent); color: #fff; cursor: pointer; margin-left: auto; transition: opacity 0.15s; }
-  .add-btn:hover { opacity: 0.85; }
-  .search-input { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 6px 12px; border: 1px solid var(--border); border-radius: 20px; background: var(--surface); color: var(--text); outline: none; width: 180px; }
-  .search-input:focus { border-color: var(--accent); }
-  .loading { text-align: center; padding: 48px; color: var(--muted); font-size: 14px; }
-  table { width: 100%; border-collapse: collapse; background: var(--surface); border-radius: 12px; overflow: hidden; border: 1px solid var(--border); font-size: 13px; }
-  thead th { text-align: left; padding: 12px 14px; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.6px; color: var(--muted); border-bottom: 1px solid var(--border); background: var(--bg); cursor: pointer; user-select: none; white-space: nowrap; }
-  thead th:hover { color: var(--text); }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: var(--bg); }
-  td { padding: 11px 14px; vertical-align: middle; }
-  .co-name { font-weight: 500; }
-  .sub { color: var(--muted); font-size: 12px; margin-top: 2px; }
-  .badge { display: inline-block; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; white-space: nowrap; }
-  .channel { font-size: 12px; color: var(--muted); }
-  .date-cell { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--muted); }
-  .recruiter-name { font-size: 12px; font-weight: 500; }
-  .recruiter-contact { font-size: 11px; color: var(--muted); }
-  .revenue { font-family: 'DM Mono', monospace; font-size: 12px; font-weight: 500; }
-  .jobs-link { font-size: 12px; color: var(--accent); text-decoration: none; }
-  .jobs-link:hover { text-decoration: underline; }
-  .actions { display: flex; gap: 6px; }
-  .icon-btn { background: none; border: 1px solid var(--border); border-radius: 6px; padding: 4px 7px; cursor: pointer; font-size: 12px; color: var(--muted); transition: all 0.15s; }
-  .icon-btn:hover { background: var(--bg); color: var(--text); }
-  .icon-btn.del:hover { border-color: #E24B4A; color: #E24B4A; }
-  .empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; }
+body{
+  font-family:'Plus Jakarta Sans',sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  font-size:14px;
+  line-height:1.6;
+}
 
-  /* MODAL */
-  .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.35); z-index: 100; align-items: center; justify-content: center; padding: 24px; overflow-y: auto; }
-  .overlay.open { display: flex; }
-  .modal { background: var(--surface); border-radius: 14px; padding: 28px; width: 100%; max-width: 520px; border: 1px solid var(--border); margin: auto; }
-  .modal h3 { font-size: 16px; font-weight: 500; margin-bottom: 20px; }
-  .field { margin-bottom: 14px; }
-  label { display: block; font-size: 11px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; color: var(--muted); margin-bottom: 5px; }
-  input, select, textarea { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 7px; background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s; }
-  input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-  textarea { resize: vertical; min-height: 60px; }
-  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-  .modal-footer { display: flex; justify-content: flex-end; gap: 8px; margin-top: 20px; }
-  .btn-cancel { font-family: 'DM Sans', sans-serif; font-size: 13px; padding: 8px 16px; border-radius: 7px; border: 1px solid var(--border); background: transparent; color: var(--muted); cursor: pointer; }
-  .btn-save { font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 8px 20px; border-radius: 7px; border: none; background: var(--accent); color: #fff; cursor: pointer; }
-  .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-  .toast { position: fixed; bottom: 24px; right: 24px; background: var(--text); color: #fff; font-size: 13px; padding: 10px 18px; border-radius: 8px; opacity: 0; transition: opacity 0.3s; z-index: 200; pointer-events: none; }
-  .toast.show { opacity: 1; }
+/* ── AUTH ── */
+#auth-screen{
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;padding:24px;
+  background: radial-gradient(ellipse at 30% 20%, #E8F5F0 0%, transparent 60%),
+              radial-gradient(ellipse at 80% 80%, #EBF1FB 0%, transparent 60%),
+              var(--bg);
+}
+.auth-box{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:48px 40px;
+  width:100%;max-width:380px;
+  text-align:center;
+  box-shadow:var(--shadow-md);
+  animation: fadeUp .5s ease both;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+.auth-logo{
+  width:48px;height:48px;
+  background:linear-gradient(135deg,var(--sage),var(--sky));
+  border-radius:12px;
+  margin:0 auto 20px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:20px;font-weight:600;color:#fff;
+}
+.auth-box h1{font-family:'Syne',sans-serif;font-size:22px;font-weight:600;margin-bottom:6px;}
+.auth-box p{font-size:13px;color:var(--text2);margin-bottom:28px;}
+.auth-box input{
+  width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:15px;
+  padding:12px 16px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--bg);color:var(--text);outline:none;
+  margin-bottom:12px;text-align:center;letter-spacing:4px;
+  transition:border-color .2s,box-shadow .2s;
+}
+.auth-box input:focus{border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-lt);}
+.auth-btn{
+  width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:14px;font-weight:600;
+  padding:12px;border:none;border-radius:var(--radius);
+  background:linear-gradient(135deg,var(--sage),#5D8A7A);
+  color:#fff;cursor:pointer;
+  transition:transform .15s,box-shadow .15s,opacity .15s;
+  box-shadow:0 2px 8px rgba(124,154,142,.35);
+}
+.auth-btn:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(124,154,142,.45);}
+.auth-btn:active{transform:translateY(0) scale(.98);}
+.auth-btn:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+.auth-error{font-size:12px;color:var(--rose);margin-top:10px;display:none;animation:shake .3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* ── APP ── */
+#app{display:none;min-height:100vh;animation:fadeUp .4s ease both;}
+
+/* ── HEADER ── */
+.app-header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:16px 24px;
+  display:flex;align-items:center;gap:12px;
+  position:sticky;top:0;z-index:50;
+  backdrop-filter:blur(8px);
+}
+.app-logo{
+  width:36px;height:36px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--sage),var(--sky));
+  border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Syne',sans-serif;font-size:14px;font-weight:600;color:#fff;
+}
+.app-title{font-family:'Syne',sans-serif;font-size:16px;font-weight:600;flex:1;}
+.header-search-wrap{flex:1;max-width:320px;}
+.header-search{
+  width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  padding:8px 12px 8px 36px;
+  border:1.5px solid var(--border);border-radius:20px;
+  background:var(--bg);color:var(--text);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+.header-search:focus{border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-lt);}
+.search-wrap{position:relative;}
+.search-icon{
+  position:absolute;left:11px;top:50%;transform:translateY(-50%);
+  color:var(--text3);pointer-events:none;font-size:14px;
+}
+
+/* ── TABS ── */
+.tabs{
+  display:flex;gap:0;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  padding:0 24px;
+  overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+}
+.tab-btn{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;
+  padding:12px 20px;border:none;background:none;color:var(--text2);
+  cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;
+  transition:color .2s,border-color .2s;white-space:nowrap;
+}
+.tab-btn.active{color:var(--sage);border-bottom-color:var(--sage);}
+.tab-btn:hover{color:var(--text);}
+.tab-panel{display:none;padding:24px;}
+.tab-panel.active{display:block;animation:fadeUp .3s ease both;}
+
+/* ── STATS ROW ── */
+.panel-header{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  margin-bottom:20px;flex-wrap:wrap;gap:12px;
+}
+.panel-title{font-family:'Syne',sans-serif;font-size:18px;font-weight:600;}
+.panel-title span{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:400;
+  color:var(--text3);margin-left:8px;
+}
+.stats{display:flex;gap:8px;flex-wrap:wrap;}
+.stat{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 16px;
+  font-size:11px;color:var(--text2);
+  transition:box-shadow .2s,transform .2s;
+}
+.stat:hover{box-shadow:var(--shadow);transform:translateY(-1px);}
+.stat strong{
+  font-family:'Syne',sans-serif;font-size:18px;font-weight:600;
+  color:var(--text);display:block;line-height:1.2;
+}
+
+/* ── TOOLBAR ── */
+.toolbar{
+  display:flex;gap:8px;margin-bottom:16px;
+  flex-wrap:wrap;align-items:center;
+}
+.filter-btn{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:12px;font-weight:500;
+  padding:6px 14px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--surface);color:var(--text2);
+  cursor:pointer;
+  transition:all .2s;white-space:nowrap;
+}
+.filter-btn:hover{border-color:var(--sage);color:var(--sage);}
+.filter-btn.active{
+  background:var(--sage);color:#fff;border-color:var(--sage);
+  box-shadow:0 2px 8px rgba(124,154,142,.3);
+}
+.search-input{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  padding:7px 12px 7px 34px;
+  border:1.5px solid var(--border);border-radius:20px;
+  background:var(--surface);color:var(--text);outline:none;
+  width:200px;
+  transition:border-color .2s,box-shadow .2s,width .3s;
+}
+.search-input:focus{
+  border-color:var(--sage);
+  box-shadow:0 0 0 3px var(--sage-lt);
+  width:260px;
+}
+.add-btn{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;
+  padding:8px 18px;border-radius:var(--radius);border:none;
+  background:linear-gradient(135deg,var(--sage),#5D8A7A);
+  color:#fff;cursor:pointer;margin-left:auto;
+  display:flex;align-items:center;gap:6px;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 2px 8px rgba(124,154,142,.3);
+}
+.add-btn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,154,142,.4);}
+.add-btn:active{transform:scale(.97);}
+
+/* ── TABLE ── */
+.table-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius-lg);overflow:hidden;
+  box-shadow:var(--shadow);
+}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;padding:12px 16px;
+  font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.7px;
+  color:var(--text3);border-bottom:1px solid var(--border);
+  background:var(--bg);cursor:pointer;user-select:none;white-space:nowrap;
+  transition:color .15s;
+}
+thead th:hover{color:var(--text);}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:#FAFAF8;}
+td{padding:12px 16px;vertical-align:middle;}
+.cell-main{font-weight:600;font-size:13px;}
+.cell-sub{color:var(--text2);font-size:12px;margin-top:2px;}
+.cell-muted{font-size:12px;color:var(--text2);}
+.cell-mono{font-size:11px;color:var(--text3);font-variant-numeric:tabular-nums;}
+.cell-small{font-size:12px;max-width:180px;line-height:1.4;}
+.link-btn{
+  color:var(--sky);font-size:12px;text-decoration:none;font-weight:500;
+  transition:color .15s;
+}
+.link-btn:hover{color:#4A72B0;}
+
+/* ── BADGES ── */
+.badge{
+  display:inline-flex;align-items:center;
+  font-size:11px;font-weight:600;
+  padding:3px 10px;border-radius:20px;white-space:nowrap;
+}
+
+/* ── ACTION BUTTONS ── */
+.actions{display:flex;gap:5px;}
+.icon-btn{
+  background:none;border:1.5px solid var(--border);
+  border-radius:7px;padding:5px 8px;
+  cursor:pointer;font-size:12px;color:var(--text2);
+  transition:all .15s;
+}
+.icon-btn:hover{background:var(--sage-lt);border-color:var(--sage);color:var(--sage);}
+.icon-btn:active{transform:scale(.93);}
+.icon-btn.del:hover{background:var(--rose-lt);border-color:var(--rose);color:var(--rose);}
+
+/* ── EMPTY / LOADING ── */
+.loading,.empty{text-align:center;padding:56px 24px;color:var(--text3);font-size:14px;}
+.loading::before{content:'⟳';display:block;font-size:28px;margin-bottom:10px;animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── OVERLAY / MODAL ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(20,18,14,.4);backdrop-filter:blur(4px);
+  z-index:100;align-items:center;justify-content:center;
+  padding:20px;overflow-y:auto;
+}
+.overlay.open{display:flex;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--surface);border-radius:var(--radius-lg);
+  padding:28px;width:100%;max-width:540px;
+  border:1px solid var(--border);margin:auto;
+  box-shadow:var(--shadow-md);
+  animation:slideUp .25s ease both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.modal h3{
+  font-family:'Syne',sans-serif;font-size:17px;font-weight:600;
+  margin-bottom:22px;
+}
+.field{margin-bottom:14px;}
+label{
+  display:block;font-size:11px;font-weight:600;
+  text-transform:uppercase;letter-spacing:.5px;
+  color:var(--text3);margin-bottom:5px;
+}
+input,select,textarea{
+  width:100%;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;
+  padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--radius);
+  background:var(--bg);color:var(--text);outline:none;
+  transition:border-color .2s,box-shadow .2s;
+}
+input:focus,select:focus,textarea:focus{
+  border-color:var(--sage);box-shadow:0 0 0 3px var(--sage-lt);
+}
+textarea{resize:vertical;min-height:72px;}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-footer{
+  display:flex;justify-content:flex-end;gap:10px;margin-top:24px;
+  padding-top:20px;border-top:1px solid var(--border);
+}
+.btn-cancel{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:500;
+  padding:9px 18px;border-radius:var(--radius);
+  border:1.5px solid var(--border);background:transparent;color:var(--text2);
+  cursor:pointer;transition:all .15s;
+}
+.btn-cancel:hover{border-color:var(--border2);color:var(--text);}
+.btn-cancel:active{transform:scale(.97);}
+.btn-save{
+  font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;
+  padding:9px 22px;border-radius:var(--radius);border:none;
+  background:linear-gradient(135deg,var(--sage),#5D8A7A);
+  color:#fff;cursor:pointer;
+  transition:transform .15s,box-shadow .15s;
+  box-shadow:0 2px 8px rgba(124,154,142,.3);
+}
+.btn-save:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(124,154,142,.4);}
+.btn-save:active{transform:scale(.97);}
+.btn-save:disabled{opacity:.5;cursor:not-allowed;transform:none;box-shadow:none;}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:24px;right:24px;
+  background:var(--text);color:#fff;
+  font-size:13px;font-weight:500;
+  padding:11px 20px;border-radius:var(--radius);
+  opacity:0;transition:opacity .3s,transform .3s;
+  transform:translateY(8px);
+  z-index:200;pointer-events:none;
+  box-shadow:var(--shadow-md);
+}
+.toast.show{opacity:1;transform:translateY(0);}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .app-header{padding:12px 16px;gap:8px;}
+  .header-search-wrap{display:none;}
+  .tabs{padding:0 16px;}
+  .tab-panel{padding:16px;}
+  .panel-header{flex-direction:column;gap:10px;}
+  .stats{gap:6px;}
+  .stat{padding:8px 12px;}
+  .stat strong{font-size:15px;}
+  .toolbar{gap:6px;}
+  .add-btn{padding:7px 14px;font-size:12px;}
+  .row2{grid-template-columns:1fr;}
+  .modal{padding:20px;}
+  .table-wrap{overflow-x:auto;}
+  table{min-width:600px;}
+  td,thead th{padding:10px 12px;}
+  .search-input{width:160px;}
+  .search-input:focus{width:200px;}
+}
+@media(max-width:480px){
+  .auth-box{padding:32px 24px;}
+  .stats .stat:nth-child(n+4){display:none;}
+  .filter-btn{font-size:11px;padding:5px 10px;}
+}
 </style>
 </head>
 <body>
@@ -103,25 +379,42 @@
 <!-- AUTH -->
 <div id="auth-screen">
   <div class="auth-box">
+    <div class="auth-logo">JP</div>
     <h1>Job Pipeline</h1>
     <p>Enter your password to continue</p>
     <input type="password" id="pwd-input" placeholder="••••••••">
-    <button class="auth-btn" id="auth-btn" onclick="checkAuth()">Access</button>
-    <div class="auth-error" id="auth-error">Incorrect password</div>
+    <button class="auth-btn" id="auth-btn" onclick="checkAuth()">Access →</button>
+    <div class="auth-error" id="auth-error">Incorrect password. Try again.</div>
   </div>
 </div>
 
 <!-- APP -->
 <div id="app">
-  <div class="tab-bar">
-    <button class="tab-btn active" onclick="switchTab('pipeline',this)">Pipeline</button>
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="app-logo">JP</div>
+    <div class="app-title">Job Pipeline</div>
+    <div class="header-search-wrap">
+      <div class="search-wrap">
+        <span class="search-icon">⌕</span>
+        <input class="header-search" id="global-search" placeholder="Search anything..." oninput="onGlobalSearch(this.value)">
+      </div>
+    </div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('pipeline',this)">Applications</button>
     <button class="tab-btn" onclick="switchTab('companies',this)">Companies</button>
   </div>
 
-  <!-- PIPELINE -->
-  <div class="tab-content active" id="tab-pipeline">
-    <div class="page-header">
-      <h2>Pipeline <span id="p-total">0 roles</span></h2>
+  <!-- PIPELINE TAB -->
+  <div id="tab-pipeline" class="tab-panel active">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Applications <span id="total-label">0 roles</span></div>
+      </div>
       <div class="stats">
         <div class="stat"><strong id="st-active">0</strong>Active</div>
         <div class="stat"><strong id="st-interview">0</strong>Interviews</div>
@@ -130,53 +423,72 @@
       </div>
     </div>
     <div class="toolbar">
-      <button class="filter-btn active" onclick="setFilter('p','all',this)">All</button>
-      <button class="filter-btn" onclick="setFilter('p','Applied',this)">Applied</button>
-      <button class="filter-btn" onclick="setFilter('p','Screening',this)">Screening</button>
-      <button class="filter-btn" onclick="setFilter('p','Interview',this)">Interview</button>
-      <button class="filter-btn" onclick="setFilter('p','Offer',this)">Offer</button>
-      <button class="filter-btn" onclick="setFilter('p','Rejected',this)">Rejected</button>
-      <button class="filter-btn" onclick="setFilter('p','No answer',this)">No answer</button>
-      <button class="add-btn" onclick="openModal('p')">+ Add role</button>
+      <button class="filter-btn active" onclick="setFilter('all',this,'p')">All</button>
+      <button class="filter-btn" onclick="setFilter('Applied',this,'p')">Applied</button>
+      <button class="filter-btn" onclick="setFilter('Screening',this,'p')">Screening</button>
+      <button class="filter-btn" onclick="setFilter('Interview',this,'p')">Interview</button>
+      <button class="filter-btn" onclick="setFilter('Offer',this,'p')">Offer</button>
+      <button class="filter-btn" onclick="setFilter('Rejected',this,'p')">Rejected</button>
+      <button class="filter-btn" onclick="setFilter('No answer',this,'p')">No answer</button>
+      <div class="search-wrap" style="margin-left:auto">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="pipeline-search" placeholder="Search roles..." oninput="renderPipeline()">
+      </div>
+      <button class="add-btn" onclick="openPipelineModal()">+ Add role</button>
     </div>
-    <div id="p-wrap"></div>
+    <div class="table-wrap" id="pipeline-wrap"></div>
   </div>
 
-  <!-- COMPANIES -->
-  <div class="tab-content" id="tab-companies">
-    <div class="page-header">
-      <h2>Companies <span id="c-total">0 companies</span></h2>
+  <!-- COMPANIES TAB -->
+  <div id="tab-companies" class="tab-panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-title">Companies <span id="companies-label">0 companies</span></div>
+      </div>
       <div class="stats">
-        <div class="stat"><strong id="c-interesting">0</strong>Interesting</div>
-        <div class="stat"><strong id="c-contacted">0</strong>Contacted</div>
+        <div class="stat"><strong id="sc-interesting">0</strong>Interesting</div>
+        <div class="stat"><strong id="sc-contacted">0</strong>Contacted</div>
+        <div class="stat"><strong id="sc-watch">0</strong>Watch</div>
       </div>
     </div>
     <div class="toolbar">
-      <button class="filter-btn active" onclick="setFilter('c','all',this)">All</button>
-      <button class="filter-btn" onclick="setFilter('c','Interesting',this)">Interesting</button>
-      <button class="filter-btn" onclick="setFilter('c','Contacted',this)">Contacted</button>
-      <button class="filter-btn" onclick="setFilter('c','Discarded',this)">Discarded</button>
-      <input class="search-input" id="c-search" placeholder="Search..." oninput="renderC()">
-      <button class="add-btn" onclick="openModal('c')">+ Add company</button>
+      <button class="filter-btn active" onclick="setFilter('all',this,'c')">All</button>
+      <button class="filter-btn" onclick="setFilter('Interesting',this,'c')">Interesting</button>
+      <button class="filter-btn" onclick="setFilter('Watch',this,'c')">Watch</button>
+      <button class="filter-btn" onclick="setFilter('Contacted',this,'c')">Contacted</button>
+      <button class="filter-btn" onclick="setFilter('Discarded',this,'c')">Discarded</button>
+      <div class="search-wrap" style="margin-left:auto">
+        <span class="search-icon">⌕</span>
+        <input class="search-input" id="company-search" placeholder="Search companies..." oninput="renderCompanies()">
+      </div>
+      <button class="add-btn" onclick="openCompanyModal()">+ Add company</button>
     </div>
-    <div id="c-wrap"></div>
+    <div class="table-wrap" id="companies-wrap"></div>
   </div>
 </div>
 
 <!-- PIPELINE MODAL -->
-<div class="overlay" id="p-overlay" onclick="if(event.target===this)closeModal('p-overlay')">
+<div class="overlay" id="pipeline-overlay" onclick="closeIfOutside(event,'pipeline-overlay')">
   <div class="modal">
-    <h3 id="p-modal-title">Add role</h3>
+    <h3 id="pipeline-modal-title">Add role</h3>
     <div class="row2">
       <div class="field"><label>Company *</label><input id="pf-company" placeholder="e.g. Salesforce"></div>
       <div class="field"><label>Role *</label><input id="pf-role" placeholder="e.g. Engagement Manager"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Status</label>
-        <select id="pf-status"><option>Applied</option><option>Screening</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>No answer</option></select>
+      <div class="field">
+        <label>Status</label>
+        <select id="pf-status">
+          <option>Applied</option><option>Screening</option><option>Interview</option>
+          <option>Offer</option><option>Rejected</option><option>No answer</option>
+        </select>
       </div>
-      <div class="field"><label>Channel</label>
-        <select id="pf-channel"><option>LinkedIn</option><option>Recruiter</option><option>Direct</option><option>Referral</option><option>Job board</option><option>Other</option></select>
+      <div class="field">
+        <label>Channel</label>
+        <select id="pf-channel">
+          <option>LinkedIn</option><option>Recruiter</option><option>Direct</option>
+          <option>Referral</option><option>Job board</option><option>Other</option>
+        </select>
       </div>
     </div>
     <div class="row2">
@@ -184,41 +496,46 @@
       <div class="field"><label>Salary band</label><input id="pf-salary" placeholder="e.g. 70–80k"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>Recruiter name</label><input id="pf-rname" placeholder="e.g. Sarah Johnson"></div>
-      <div class="field"><label>Recruiter contact</label><input id="pf-rcontact" placeholder="email, phone or LinkedIn"></div>
+      <div class="field"><label>Recruiter name</label><input id="pf-recruiter-name" placeholder="e.g. Sarah Johnson"></div>
+      <div class="field"><label>Recruiter contact</label><input id="pf-recruiter-contact" placeholder="email or LinkedIn"></div>
     </div>
-    <div class="field"><label>Next step</label><input id="pf-next" placeholder="e.g. Follow up on Friday"></div>
-    <div class="field"><label>Notes</label><textarea id="pf-notes"></textarea></div>
+    <div class="field"><label>Next step</label><input id="pf-next" placeholder="e.g. Follow up Friday"></div>
+    <div class="field"><label>Notes</label><textarea id="pf-notes" placeholder="Impressions, links, context..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal('p-overlay')">Cancel</button>
-      <button class="btn-save" id="p-save-btn" onclick="saveP()">Save</button>
+      <button class="btn-cancel" onclick="closeModal('pipeline-overlay')">Cancel</button>
+      <button class="btn-save" id="pipeline-btn-save" onclick="savePipelineEntry()">Save</button>
     </div>
   </div>
 </div>
 
-<!-- COMPANIES MODAL -->
-<div class="overlay" id="c-overlay" onclick="if(event.target===this)closeModal('c-overlay')">
+<!-- COMPANY MODAL -->
+<div class="overlay" id="company-overlay" onclick="closeIfOutside(event,'company-overlay')">
   <div class="modal">
-    <h3 id="c-modal-title">Add company</h3>
+    <h3 id="company-modal-title">Add company</h3>
     <div class="row2">
       <div class="field"><label>Company *</label><input id="cf-company" placeholder="e.g. HubSpot"></div>
-      <div class="field"><label>Sector</label><input id="cf-sector" placeholder="e.g. CRM"></div>
+      <div class="field"><label>Sector</label><input id="cf-sector" placeholder="e.g. CRM / Martech"></div>
     </div>
     <div class="row2">
       <div class="field"><label>Revenue</label><input id="cf-revenue" placeholder="e.g. $2.6B"></div>
       <div class="field"><label>Employees</label><input id="cf-employees" placeholder="e.g. 7400"></div>
     </div>
     <div class="row2">
-      <div class="field"><label>EMEA Presence</label><input id="cf-emea" placeholder="e.g. Dublin"></div>
-      <div class="field"><label>Status</label>
-        <select id="cf-status"><option value="">None</option><option>Interesting</option><option>Contacted</option><option>Discarded</option></select>
+      <div class="field"><label>EMEA Presence</label><input id="cf-emea" placeholder="e.g. Madrid / Dublin"></div>
+      <div class="field">
+        <label>Status</label>
+        <select id="cf-status">
+          <option value=""></option>
+          <option>Interesting</option><option>Watch</option>
+          <option>Contacted</option><option>Discarded</option>
+        </select>
       </div>
     </div>
     <div class="field"><label>Jobs URL</label><input id="cf-jobs" placeholder="https://..."></div>
-    <div class="field"><label>Notes</label><textarea id="cf-notes"></textarea></div>
+    <div class="field"><label>Notes</label><textarea id="cf-notes" placeholder="Context, contacts, open roles..."></textarea></div>
     <div class="modal-footer">
-      <button class="btn-cancel" onclick="closeModal('c-overlay')">Cancel</button>
-      <button class="btn-save" id="c-save-btn" onclick="saveC()">Save</button>
+      <button class="btn-cancel" onclick="closeModal('company-overlay')">Cancel</button>
+      <button class="btn-save" id="company-btn-save" onclick="saveCompanyEntry()">Save</button>
     </div>
   </div>
 </div>
@@ -226,235 +543,324 @@
 <div class="toast" id="toast"></div>
 
 <script>
-const W = 'https://jc-pipeline.jcarloscsva.workers.dev';
-let PD = [], CD = [];
-let pEditId = null, cEditId = null;
-let pFilter = 'all', cFilter = 'all';
-let pSortK = 'Date Applied', pSortD = -1;
-let cSortK = 'Revenue', cSortD = -1;
+const WORKER = 'https://jc-pipeline.jcarloscsva.workers.dev';
+let pipelineData=[], companiesData=[];
+let pipelineEditId=null, companyEditId=null;
+let pipelineFilter='all', companiesFilter='all';
+let pipelineSortKey='Date Applied', pipelineSortDir=-1;
+let companiesSortKey='Revenue', companiesSortDir=-1;
+let globalSearch='';
 
-const PS = {
-  'Applied':   ['#E8F0FE','#1A3A9C'], 'Screening': ['#FFF3CD','#7A5000'],
-  'Interview': ['#E6F4EA','#1A5C2A'], 'Offer':     ['#FCE8FF','#6B1A8A'],
-  'Rejected':  ['#FEECEC','#8A1A1A'], 'No answer': ['#F0EFED','#5C5A56'],
+const pStatus={
+  Applied:  {bg:'var(--sky-lt)',  color:'var(--sky)'},
+  Screening:{bg:'var(--amber-lt)',color:'var(--amber)'},
+  Interview:{bg:'var(--sage-lt)', color:'var(--sage)'},
+  Offer:    {bg:'var(--plum-lt)', color:'var(--plum)'},
+  Rejected: {bg:'var(--rose-lt)', color:'var(--rose)'},
+  'No answer':{bg:'var(--slate-lt)',color:'var(--slate)'},
 };
-const CS = {
-  'Interesting': ['#E8F0FE','#1A3A9C'],
-  'Contacted':   ['#E6F4EA','#1A5C2A'],
-  'Discarded':   ['#FEECEC','#8A1A1A'],
+const cStatus={
+  Interesting:{bg:'var(--sky-lt)',  color:'var(--sky)'},
+  Watch:      {bg:'var(--amber-lt)',color:'var(--amber)'},
+  Contacted:  {bg:'var(--sage-lt)', color:'var(--sage)'},
+  Discarded:  {bg:'var(--rose-lt)', color:'var(--rose)'},
 };
 
-async function checkAuth() {
-  const val = document.getElementById('pwd-input').value.trim();
-  if (!val) return;
-  const btn = document.getElementById('auth-btn');
-  btn.disabled = true; btn.textContent = 'Checking...';
-  try {
-    const r = await fetch(`${W}/api/config`);
-    const d = await r.json();
-    if (d.records?.[0]?.fields['Value'] === val) {
-      document.getElementById('auth-screen').style.display = 'none';
-      document.getElementById('app').style.display = 'block';
-      loadP(); loadC();
-    } else {
-      document.getElementById('auth-error').style.display = 'block';
-      document.getElementById('pwd-input').value = '';
+// AUTH
+async function checkAuth(){
+  const val=document.getElementById('pwd-input').value.trim();
+  if(!val)return;
+  const btn=document.getElementById('auth-btn');
+  btn.disabled=true;btn.textContent='Checking...';
+  try{
+    const r=await fetch(`${WORKER}/api/config`);
+    const d=await r.json();
+    const rec=d.records?.[0];
+    if(rec&&rec.fields['Value']===val){
+      document.getElementById('auth-screen').style.display='none';
+      document.getElementById('app').style.display='block';
+      loadPipeline();loadCompanies();
+    }else{
+      const err=document.getElementById('auth-error');
+      err.style.display='block';
+      document.getElementById('pwd-input').value='';
       document.getElementById('pwd-input').focus();
     }
-  } catch(e) {
-    document.getElementById('auth-error').textContent = 'Connection error.';
-    document.getElementById('auth-error').style.display = 'block';
+  }catch(e){
+    const err=document.getElementById('auth-error');
+    err.textContent='Connection error. Try again.';
+    err.style.display='block';
   }
-  btn.disabled = false; btn.textContent = 'Access';
+  btn.disabled=false;btn.textContent='Access →';
 }
 
-function switchTab(tab, btn) {
-  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+// GLOBAL SEARCH
+function onGlobalSearch(val){
+  globalSearch=val.toLowerCase();
+  renderPipeline();renderCompanies();
+}
+
+// TABS
+function switchTab(tab,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
   btn.classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
+  document.getElementById('tab-'+tab).classList.add('active');
 }
 
-async function loadP() {
-  document.getElementById('p-wrap').innerHTML = '<div class="loading">Loading...</div>';
-  try {
-    let all = [], offset = null;
-    do {
-      const r = await fetch(`${W}/api/records?pageSize=100${offset?'&offset='+offset:''}`);
-      const d = await r.json(); all = all.concat(d.records||[]); offset = d.offset;
-    } while(offset);
-    PD = all.map(r => ({ id: r.id, ...r.fields })); renderP();
-  } catch(e) { document.getElementById('p-wrap').innerHTML = '<div class="loading">Error loading.</div>'; }
-}
-
-async function loadC() {
-  document.getElementById('c-wrap').innerHTML = '<div class="loading">Loading...</div>';
-  try {
-    let all = [], offset = null;
-    do {
-      const r = await fetch(`${W}/api/companies?pageSize=100${offset?'&offset='+offset:''}`);
-      const d = await r.json(); all = all.concat(d.records||[]); offset = d.offset;
-    } while(offset);
-    CD = all.map(r => ({ id: r.id, ...r.fields })); renderC();
-  } catch(e) { document.getElementById('c-wrap').innerHTML = '<div class="loading">Error loading.</div>'; }
-}
-
-function renderP() {
-  let rows = [...PD];
-  if (pFilter !== 'all') rows = rows.filter(r => r['Status'] === pFilter);
-  rows.sort((a,b) => { let av=a[pSortK]||'',bv=b[pSortK]||''; return av<bv?pSortD:av>bv?-pSortD:0; });
-  const w = document.getElementById('p-wrap');
-  if (!rows.length) { w.innerHTML='<table><tbody><tr><td colspan="7"><div class="empty">No roles yet.</div></td></tr></tbody></table>'; }
-  else {
-    w.innerHTML = `<table><thead><tr>
-      <th onclick="sortP('Company')">Company</th><th onclick="sortP('Status')">Status</th>
-      <th onclick="sortP('Channel')">Channel</th><th onclick="sortP('Date Applied')">Date</th>
-      <th>Recruiter</th><th>Next step</th><th></th>
-    </tr></thead><tbody>${rows.map(r => {
-      const s = PS[r['Status']]||PS['Applied'];
-      const dt = r['Date Applied'] ? new Date(r['Date Applied']+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}) : '';
-      return `<tr>
-        <td><div class="co-name">${esc(r['Company']||'')}</div><div class="sub">${esc(r['Role']||'')}${r['Salary Band']?' · '+esc(r['Salary Band']):''}</div></td>
-        <td><span class="badge" style="background:${s[0]};color:${s[1]}">${esc(r['Status']||'')}</span></td>
-        <td><span class="channel">${esc(r['Channel']||'')}</span></td>
-        <td><span class="date-cell">${dt}</span></td>
-        <td><div class="recruiter-name">${esc(r['Recruiter Name']||'')}</div><div class="recruiter-contact">${esc(r['Recruiter Contact']||'')}</div></td>
-        <td><span style="font-size:12px;max-width:160px;display:block">${esc(r['Next Step']||'')}</span></td>
-        <td><div class="actions">
-          <button class="icon-btn" onclick="openModal('p','${r.id}')">✎</button>
-          <button class="icon-btn del" onclick="delP('${r.id}')">✕</button>
-        </div></td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
+// PIPELINE
+async function loadPipeline(){
+  document.getElementById('pipeline-wrap').innerHTML='<div class="loading"></div>';
+  try{
+    let all=[],offset=null;
+    do{
+      const url=`${WORKER}/api/records?pageSize=100`+(offset?'&offset='+offset:'');
+      const r=await fetch(url);const d=await r.json();
+      all=all.concat(d.records||[]);offset=d.offset;
+    }while(offset);
+    pipelineData=all.map(r=>({id:r.id,...r.fields}));
+    renderPipeline();
+  }catch(e){
+    document.getElementById('pipeline-wrap').innerHTML='<div class="empty">Error loading data.</div>';
   }
-  const now=new Date(), wa=new Date(now-7*86400000);
-  document.getElementById('p-total').textContent = PD.length+' role'+(PD.length!==1?'s':'');
-  document.getElementById('st-active').textContent = PD.filter(r=>!['Rejected','No answer'].includes(r['Status'])).length;
-  document.getElementById('st-interview').textContent = PD.filter(r=>r['Status']==='Interview').length;
-  document.getElementById('st-offer').textContent = PD.filter(r=>r['Status']==='Offer').length;
-  document.getElementById('st-week').textContent = PD.filter(r=>r['Date Applied']&&new Date(r['Date Applied'])>=wa).length;
 }
 
-function renderC() {
-  const q = (document.getElementById('c-search')?.value||'').toLowerCase();
-  let rows = [...CD];
-  if (cFilter !== 'all') rows = rows.filter(r => r['Status'] === cFilter);
-  if (q) rows = rows.filter(r => (r['Company']||'').toLowerCase().includes(q)||(r['Sector']||'').toLowerCase().includes(q));
-  rows.sort((a,b) => {
-    if (cSortK==='Revenue') { return (parseRev(a['Revenue'])-parseRev(b['Revenue']))*cSortD; }
-    let av=a[cSortK]||'',bv=b[cSortK]||''; return av<bv?cSortD:av>bv?-cSortD:0;
+function renderPipeline(){
+  const localSearch=(document.getElementById('pipeline-search')?.value||'').toLowerCase();
+  const search=globalSearch||localSearch;
+  let rows=[...pipelineData];
+  if(pipelineFilter!=='all')rows=rows.filter(r=>r['Status']===pipelineFilter);
+  if(search)rows=rows.filter(r=>
+    (r['Company']||'').toLowerCase().includes(search)||
+    (r['Role']||'').toLowerCase().includes(search)||
+    (r['Recruiter Name']||'').toLowerCase().includes(search)||
+    (r['Next Step']||'').toLowerCase().includes(search)||
+    (r['Notes']||'').toLowerCase().includes(search)
+  );
+  rows.sort((a,b)=>{
+    let av=a[pipelineSortKey]||'',bv=b[pipelineSortKey]||'';
+    return av<bv?pipelineSortDir:av>bv?-pipelineSortDir:0;
   });
-  const w = document.getElementById('c-wrap');
-  if (!rows.length) { w.innerHTML='<table><tbody><tr><td colspan="7"><div class="empty">No companies found.</div></td></tr></tbody></table>'; }
-  else {
-    w.innerHTML = `<table><thead><tr>
-      <th onclick="sortC('Company')">Company</th><th onclick="sortC('Sector')">Sector</th>
-      <th onclick="sortC('Revenue')">Revenue ↕</th><th onclick="sortC('Employees')">Employees</th>
-      <th>EMEA</th><th onclick="sortC('Status')">Status</th><th></th>
-    </tr></thead><tbody>${rows.map(r => {
-      const s = CS[r['Status']];
-      return `<tr>
-        <td>
-          <div class="co-name">${esc(r['Company']||'')}</div>
-          ${r['Jobs URL']?`<a class="jobs-link" href="${esc(r['Jobs URL'])}" target="_blank">Jobs ↗</a>`:''}
-        </td>
-        <td><span class="channel">${esc(r['Sector']||'')}</span></td>
-        <td><span class="revenue">${esc(r['Revenue']||'')}</span></td>
-        <td><span class="sub">${esc(r['Employees']||'')}</span></td>
-        <td><span class="sub">${esc(r['EMEA Presence']||'')}</span></td>
-        <td>${s?`<span class="badge" style="background:${s[0]};color:${s[1]}">${esc(r['Status'])}</span>`:''}</td>
-        <td><div class="actions">
-          <button class="icon-btn" onclick="openModal('c','${r.id}')">✎</button>
-          <button class="icon-btn del" onclick="delC('${r.id}')">✕</button>
-        </div></td>
-      </tr>`;
-    }).join('')}</tbody></table>`;
+  const wrap=document.getElementById('pipeline-wrap');
+  if(!rows.length){
+    wrap.innerHTML='<div class="empty">No applications found.</div>';
+  }else{
+    wrap.innerHTML=`<table>
+      <thead><tr>
+        <th onclick="sortPipeline('Company')">Company</th>
+        <th onclick="sortPipeline('Status')">Status</th>
+        <th onclick="sortPipeline('Channel')">Channel</th>
+        <th onclick="sortPipeline('Date Applied')">Date</th>
+        <th>Recruiter</th>
+        <th>Next step</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${rows.map(r=>{
+        const s=pStatus[r['Status']]||pStatus['Applied'];
+        const dateStr=r['Date Applied']?new Date(r['Date Applied']+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+        return`<tr>
+          <td><div class="cell-main">${esc(r['Company']||'')}</div><div class="cell-sub">${esc(r['Role']||'')}${r['Salary Band']?' · '+esc(r['Salary Band']):''}</div></td>
+          <td><span class="badge" style="background:${s.bg};color:${s.color}">${esc(r['Status']||'')}</span></td>
+          <td><span class="cell-muted">${esc(r['Channel']||'')}</span></td>
+          <td><span class="cell-mono">${dateStr}</span></td>
+          <td><div class="cell-main" style="font-size:12px">${esc(r['Recruiter Name']||'')}</div><div class="cell-sub">${esc(r['Recruiter Contact']||'')}</div></td>
+          <td><span class="cell-small">${esc(r['Next Step']||'')}</span></td>
+          <td><div class="actions">
+            <button class="icon-btn" onclick="openPipelineModal('${r.id}')">✎</button>
+            <button class="icon-btn del" onclick="deletePipelineEntry('${r.id}')">✕</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
   }
-  document.getElementById('c-total').textContent = CD.length+' companies';
-  document.getElementById('c-interesting').textContent = CD.filter(r=>r['Status']==='Interesting').length;
-  document.getElementById('c-contacted').textContent = CD.filter(r=>r['Status']==='Contacted').length;
+  updatePipelineStats();
 }
 
-function parseRev(s) {
-  if (!s) return 0;
-  const m = s.match(/([\d.]+)([BMK]?)/i);
-  if (!m) return 0;
-  const n=parseFloat(m[1]),u=m[2].toUpperCase();
-  return u==='B'?n*1e9:u==='M'?n*1e6:u==='K'?n*1e3:n;
+function updatePipelineStats(){
+  const now=new Date(),weekAgo=new Date(now-7*86400000);
+  document.getElementById('total-label').textContent=pipelineData.length+' role'+(pipelineData.length!==1?'s':'');
+  document.getElementById('st-active').textContent=pipelineData.filter(r=>!['Rejected','No answer'].includes(r['Status'])).length;
+  document.getElementById('st-interview').textContent=pipelineData.filter(r=>r['Status']==='Interview').length;
+  document.getElementById('st-offer').textContent=pipelineData.filter(r=>r['Status']==='Offer').length;
+  document.getElementById('st-week').textContent=pipelineData.filter(r=>r['Date Applied']&&new Date(r['Date Applied'])>=weekAgo).length;
 }
 
-function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function openModal(type, id) {
-  if (type==='p') {
-    pEditId = id||null;
-    document.getElementById('p-modal-title').textContent = pEditId?'Edit role':'Add role';
-    const r = pEditId ? PD.find(x=>x.id===pEditId) : null;
-    document.getElementById('pf-company').value = r?.['Company']||'';
-    document.getElementById('pf-role').value = r?.['Role']||'';
-    document.getElementById('pf-status').value = r?.['Status']||'Applied';
-    document.getElementById('pf-channel').value = r?.['Channel']||'LinkedIn';
-    document.getElementById('pf-date').value = r?.['Date Applied']||new Date().toISOString().split('T')[0];
-    document.getElementById('pf-salary').value = r?.['Salary Band']||'';
-    document.getElementById('pf-rname').value = r?.['Recruiter Name']||'';
-    document.getElementById('pf-rcontact').value = r?.['Recruiter Contact']||'';
-    document.getElementById('pf-next').value = r?.['Next Step']||'';
-    document.getElementById('pf-notes').value = r?.['Notes']||'';
-    document.getElementById('p-overlay').classList.add('open');
-    setTimeout(()=>document.getElementById('pf-company').focus(),50);
-  } else {
-    cEditId = id||null;
-    document.getElementById('c-modal-title').textContent = cEditId?'Edit company':'Add company';
-    const r = cEditId ? CD.find(x=>x.id===cEditId) : null;
-    document.getElementById('cf-company').value = r?.['Company']||'';
-    document.getElementById('cf-sector').value = r?.['Sector']||'';
-    document.getElementById('cf-revenue').value = r?.['Revenue']||'';
-    document.getElementById('cf-employees').value = r?.['Employees']||'';
-    document.getElementById('cf-emea').value = r?.['EMEA Presence']||'';
-    document.getElementById('cf-status').value = r?.['Status']||'';
-    document.getElementById('cf-jobs').value = r?.['Jobs URL']||'';
-    document.getElementById('cf-notes').value = r?.['Notes']||'';
-    document.getElementById('c-overlay').classList.add('open');
-    setTimeout(()=>document.getElementById('cf-company').focus(),50);
+// COMPANIES
+async function loadCompanies(){
+  document.getElementById('companies-wrap').innerHTML='<div class="loading"></div>';
+  try{
+    let all=[],offset=null;
+    do{
+      const url=`${WORKER}/api/companies?pageSize=100`+(offset?'&offset='+offset:'');
+      const r=await fetch(url);const d=await r.json();
+      all=all.concat(d.records||[]);offset=d.offset;
+    }while(offset);
+    companiesData=all.map(r=>({id:r.id,...r.fields}));
+    renderCompanies();
+  }catch(e){
+    document.getElementById('companies-wrap').innerHTML='<div class="empty">Error loading companies.</div>';
   }
 }
 
-function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+function renderCompanies(){
+  const localSearch=(document.getElementById('company-search')?.value||'').toLowerCase();
+  const search=globalSearch||localSearch;
+  let rows=[...companiesData];
+  if(companiesFilter!=='all')rows=rows.filter(r=>r['Status']===companiesFilter);
+  if(search)rows=rows.filter(r=>
+    (r['Company']||'').toLowerCase().includes(search)||
+    (r['Sector']||'').toLowerCase().includes(search)||
+    (r['EMEA Presence']||'').toLowerCase().includes(search)||
+    (r['Notes']||'').toLowerCase().includes(search)
+  );
+  rows.sort((a,b)=>{
+    let av=a[companiesSortKey]||'',bv=b[companiesSortKey]||'';
+    return av<bv?companiesSortDir:av>bv?-companiesSortDir:0;
+  });
+  const wrap=document.getElementById('companies-wrap');
+  if(!rows.length){
+    wrap.innerHTML='<div class="empty">No companies found.</div>';
+  }else{
+    wrap.innerHTML=`<table>
+      <thead><tr>
+        <th onclick="sortCompanies('Company')">Company</th>
+        <th onclick="sortCompanies('Sector')">Sector</th>
+        <th onclick="sortCompanies('Revenue')">Revenue</th>
+        <th onclick="sortCompanies('Employees')">Employees</th>
+        <th onclick="sortCompanies('EMEA Presence')">EMEA</th>
+        <th onclick="sortCompanies('Status')">Status</th>
+        <th></th>
+      </tr></thead>
+      <tbody>${rows.map(r=>{
+        const s=cStatus[r['Status']]||null;
+        const badge=s?`<span class="badge" style="background:${s.bg};color:${s.color}">${esc(r['Status'])}</span>`:'<span class="cell-muted">—</span>';
+        const jobsLink=r['Jobs URL']?`<a href="${esc(r['Jobs URL'])}" target="_blank" class="link-btn">Jobs ↗</a>`:'';
+        return`<tr>
+          <td><div class="cell-main">${esc(r['Company']||'')}</div>${jobsLink?'<div class="cell-sub">'+jobsLink+'</div>':''}</td>
+          <td><span class="cell-muted">${esc(r['Sector']||'')}</span></td>
+          <td><span class="cell-mono">${esc(r['Revenue']||'')}</span></td>
+          <td><span class="cell-muted">${esc(r['Employees']||'')}</span></td>
+          <td><span class="cell-muted">${esc(r['EMEA Presence']||'')}</span></td>
+          <td>${badge}</td>
+          <td><div class="actions">
+            <button class="icon-btn" onclick="openCompanyModal('${r.id}')">✎</button>
+            <button class="icon-btn del" onclick="deleteCompanyEntry('${r.id}')">✕</button>
+          </div></td>
+        </tr>`;
+      }).join('')}</tbody></table>`;
+  }
+  updateCompaniesStats();
+}
 
-async function saveP() {
+function updateCompaniesStats(){
+  document.getElementById('companies-label').textContent=companiesData.length+' companies';
+  document.getElementById('sc-interesting').textContent=companiesData.filter(r=>r['Status']==='Interesting').length;
+  document.getElementById('sc-contacted').textContent=companiesData.filter(r=>r['Status']==='Contacted').length;
+  document.getElementById('sc-watch').textContent=companiesData.filter(r=>r['Status']==='Watch').length;
+}
+
+// FILTERS & SORT
+function setFilter(f,btn,type){
+  if(type==='p'){pipelineFilter=f;document.querySelectorAll('#tab-pipeline .filter-btn').forEach(b=>b.classList.remove('active'));renderPipeline();}
+  else{companiesFilter=f;document.querySelectorAll('#tab-companies .filter-btn').forEach(b=>b.classList.remove('active'));renderCompanies();}
+  btn.classList.add('active');
+}
+function sortPipeline(k){if(pipelineSortKey===k)pipelineSortDir*=-1;else{pipelineSortKey=k;pipelineSortDir=1;}renderPipeline();}
+function sortCompanies(k){if(companiesSortKey===k)companiesSortDir*=-1;else{companiesSortKey=k;companiesSortDir=1;}renderCompanies();}
+
+// PIPELINE MODAL
+function openPipelineModal(id){
+  pipelineEditId=id||null;
+  document.getElementById('pipeline-modal-title').textContent=pipelineEditId?'Edit role':'Add role';
+  if(pipelineEditId){
+    const r=pipelineData.find(x=>x.id===pipelineEditId);
+    document.getElementById('pf-company').value=r['Company']||'';
+    document.getElementById('pf-role').value=r['Role']||'';
+    document.getElementById('pf-status').value=r['Status']||'Applied';
+    document.getElementById('pf-channel').value=r['Channel']||'LinkedIn';
+    document.getElementById('pf-date').value=r['Date Applied']||'';
+    document.getElementById('pf-salary').value=r['Salary Band']||'';
+    document.getElementById('pf-recruiter-name').value=r['Recruiter Name']||'';
+    document.getElementById('pf-recruiter-contact').value=r['Recruiter Contact']||'';
+    document.getElementById('pf-next').value=r['Next Step']||'';
+    document.getElementById('pf-notes').value=r['Notes']||'';
+  }else{
+    ['pf-company','pf-role','pf-salary','pf-recruiter-name','pf-recruiter-contact','pf-next','pf-notes'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('pf-status').value='Applied';
+    document.getElementById('pf-channel').value='LinkedIn';
+    document.getElementById('pf-date').value=new Date().toISOString().split('T')[0];
+  }
+  document.getElementById('pipeline-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('pf-company').focus(),80);
+}
+
+async function savePipelineEntry(){
   const company=document.getElementById('pf-company').value.trim();
   const role=document.getElementById('pf-role').value.trim();
-  if (!company||!role) { alert('Company and role are required.'); return; }
-  const fields = {
+  if(!company||!role){alert('Company and role are required.');return;}
+  const fields={
     'Company':company,'Role':role,
     'Status':document.getElementById('pf-status').value,
     'Channel':document.getElementById('pf-channel').value,
     'Date Applied':document.getElementById('pf-date').value||null,
     'Salary Band':document.getElementById('pf-salary').value.trim(),
-    'Recruiter Name':document.getElementById('pf-rname').value.trim(),
-    'Recruiter Contact':document.getElementById('pf-rcontact').value.trim(),
+    'Recruiter Name':document.getElementById('pf-recruiter-name').value.trim(),
+    'Recruiter Contact':document.getElementById('pf-recruiter-contact').value.trim(),
     'Next Step':document.getElementById('pf-next').value.trim(),
     'Notes':document.getElementById('pf-notes').value.trim(),
   };
-  const btn=document.getElementById('p-save-btn');
-  btn.disabled=true; btn.textContent='Saving...';
-  try {
-    if (pEditId) {
-      const d=await (await fetch(`${W}/api/records/${pEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
-      PD[PD.findIndex(x=>x.id===pEditId)]={id:pEditId,...d.fields};
-    } else {
-      const d=await (await fetch(`${W}/api/records`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
-      PD.unshift({id:d.id,...d.fields});
+  const btn=document.getElementById('pipeline-btn-save');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    if(pipelineEditId){
+      const r=await fetch(`${WORKER}/api/records/${pipelineEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+      const d=await r.json();
+      const idx=pipelineData.findIndex(x=>x.id===pipelineEditId);
+      pipelineData[idx]={id:pipelineEditId,...d.fields};
+    }else{
+      const r=await fetch(`${WORKER}/api/records`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+      const d=await r.json();
+      pipelineData.unshift({id:d.id,...d.fields});
     }
-    renderP(); closeModal('p-overlay'); showToast(pEditId?'Entry updated':'Role added');
-  } catch(e) { alert('Error saving.'); }
-  btn.disabled=false; btn.textContent='Save';
+    renderPipeline();closeModal('pipeline-overlay');showToast(pipelineEditId?'Entry updated ✓':'Role added ✓');
+  }catch(e){alert('Error saving.');}
+  btn.disabled=false;btn.textContent='Save';
 }
 
-async function saveC() {
+async function deletePipelineEntry(id){
+  if(!confirm('Remove this entry?'))return;
+  try{
+    await fetch(`${WORKER}/api/records/${id}`,{method:'DELETE'});
+    pipelineData=pipelineData.filter(x=>x.id!==id);
+    renderPipeline();showToast('Entry removed');
+  }catch(e){alert('Error deleting.');}
+}
+
+// COMPANY MODAL
+function openCompanyModal(id){
+  companyEditId=id||null;
+  document.getElementById('company-modal-title').textContent=companyEditId?'Edit company':'Add company';
+  if(companyEditId){
+    const r=companiesData.find(x=>x.id===companyEditId);
+    document.getElementById('cf-company').value=r['Company']||'';
+    document.getElementById('cf-sector').value=r['Sector']||'';
+    document.getElementById('cf-revenue').value=r['Revenue']||'';
+    document.getElementById('cf-employees').value=r['Employees']||'';
+    document.getElementById('cf-emea').value=r['EMEA Presence']||'';
+    document.getElementById('cf-status').value=r['Status']||'';
+    document.getElementById('cf-jobs').value=r['Jobs URL']||'';
+    document.getElementById('cf-notes').value=r['Notes']||'';
+  }else{
+    ['cf-company','cf-sector','cf-revenue','cf-employees','cf-emea','cf-jobs','cf-notes'].forEach(i=>document.getElementById(i).value='');
+    document.getElementById('cf-status').value='';
+  }
+  document.getElementById('company-overlay').classList.add('open');
+  setTimeout(()=>document.getElementById('cf-company').focus(),80);
+}
+
+async function saveCompanyEntry(){
   const company=document.getElementById('cf-company').value.trim();
-  if (!company) { alert('Company name is required.'); return; }
-  const fields = {
+  if(!company){alert('Company name is required.');return;}
+  const fields={
     'Company':company,
     'Sector':document.getElementById('cf-sector').value.trim(),
     'Revenue':document.getElementById('cf-revenue').value.trim(),
@@ -464,50 +870,44 @@ async function saveC() {
     'Jobs URL':document.getElementById('cf-jobs').value.trim(),
     'Notes':document.getElementById('cf-notes').value.trim(),
   };
-  const btn=document.getElementById('c-save-btn');
-  btn.disabled=true; btn.textContent='Saving...';
-  try {
-    if (cEditId) {
-      const d=await (await fetch(`${W}/api/companies/${cEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
-      CD[CD.findIndex(x=>x.id===cEditId)]={id:cEditId,...d.fields};
-    } else {
-      const d=await (await fetch(`${W}/api/companies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})})).json();
-      CD.unshift({id:d.id,...d.fields});
+  const btn=document.getElementById('company-btn-save');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    if(companyEditId){
+      const r=await fetch(`${WORKER}/api/companies/${companyEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+      const d=await r.json();
+      const idx=companiesData.findIndex(x=>x.id===companyEditId);
+      companiesData[idx]={id:companyEditId,...d.fields};
+    }else{
+      const r=await fetch(`${WORKER}/api/companies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+      const d=await r.json();
+      companiesData.unshift({id:d.id,...d.fields});
     }
-    renderC(); closeModal('c-overlay'); showToast(cEditId?'Company updated':'Company added');
-  } catch(e) { alert('Error saving.'); }
-  btn.disabled=false; btn.textContent='Save';
+    renderCompanies();closeModal('company-overlay');showToast(companyEditId?'Company updated ✓':'Company added ✓');
+  }catch(e){alert('Error saving.');}
+  btn.disabled=false;btn.textContent='Save';
 }
 
-async function delP(id) {
-  if (!confirm('Remove this entry?')) return;
-  await fetch(`${W}/api/records/${id}`,{method:'DELETE'});
-  PD=PD.filter(x=>x.id!==id); renderP(); showToast('Entry removed');
+async function deleteCompanyEntry(id){
+  if(!confirm('Remove this company?'))return;
+  try{
+    await fetch(`${WORKER}/api/companies/${id}`,{method:'DELETE'});
+    companiesData=companiesData.filter(x=>x.id!==id);
+    renderCompanies();showToast('Company removed');
+  }catch(e){alert('Error deleting.');}
 }
 
-async function delC(id) {
-  if (!confirm('Remove this company?')) return;
-  await fetch(`${W}/api/companies/${id}`,{method:'DELETE'});
-  CD=CD.filter(x=>x.id!==id); renderC(); showToast('Company removed');
-}
-
-function setFilter(type,f,btn) {
-  if (type==='p') { pFilter=f; document.querySelectorAll('#tab-pipeline .filter-btn').forEach(b=>b.classList.remove('active')); renderP(); }
-  else { cFilter=f; document.querySelectorAll('#tab-companies .filter-btn').forEach(b=>b.classList.remove('active')); renderC(); }
-  btn.classList.add('active');
-}
-
-function sortP(k) { if(pSortK===k)pSortD*=-1; else{pSortK=k;pSortD=1;} renderP(); }
-function sortC(k) { if(cSortK===k)cSortD*=-1; else{cSortK=k;cSortD=-1;} renderC(); }
-
-function showToast(msg) {
+// UTILS
+function closeModal(id){document.getElementById(id).classList.remove('open');pipelineEditId=null;companyEditId=null;}
+function closeIfOutside(e,id){if(e.target===document.getElementById(id))closeModal(id);}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function showToast(msg){
   const t=document.getElementById('toast');
-  t.textContent=msg; t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2500);
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2800);
 }
-
-document.addEventListener('keydown',e=>{ if(e.key==='Escape'){closeModal('p-overlay');closeModal('c-overlay');} });
-document.getElementById('pwd-input').addEventListener('keydown',e=>{ if(e.key==='Enter')checkAuth(); });
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal('pipeline-overlay');closeModal('company-overlay');}});
+document.getElementById('pwd-input').addEventListener('keydown',e=>{if(e.key==='Enter')checkAuth();});
 </script>
 </body>
 </html>
