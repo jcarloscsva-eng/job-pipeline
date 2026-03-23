@@ -317,6 +317,7 @@ textarea{resize:vertical;min-height:68px}
       <div class="field"><label>From</label><input type="date" id="pdf-from"></div>
       <div class="field"><label>To</label><input type="date" id="pdf-to"></div>
     </div>
+    <div id="pdf-stats" style="display:none;margin-top:12px;padding:12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border);font-size:12px"></div>
     <div class="mf">
       <button class="bcl" onclick="closeModal('pdf-ov')">Cancel</button>
       <button class="bsv" id="pdf-gen-btn" onclick="generatePdf()">Export PDF</button>
@@ -675,11 +676,36 @@ async function delAction(id){
 }
 
 // PDF
+async function loadPdfStats(){
+  const from=document.getElementById('pdf-from').value;
+  const to=document.getElementById('pdf-to').value;
+  if(!from||!to)return;
+  const statsEl=document.getElementById('pdf-stats');
+  if(!statsEl)return;
+  statsEl.innerHTML='<span style="color:var(--text3)">Loading...</span>';
+  statsEl.style.display='block';
+  try{
+    const toNext=new Date(to+'T12:00:00');toNext.setDate(toNext.getDate()+1);
+    const toAdj=toNext.toISOString().split('T')[0];
+    const formula=encodeURIComponent(`AND({Date}>="${from}",{Date}<"${toAdj}")`);
+    const r=await fetch(`${W}/api/actions?pageSize=100&filterByFormula=${formula}`);
+    const d=await r.json();
+    const actions=(d.records||[]).map(x=>({id:x.id,...x.fields}));
+    if(!actions.length){statsEl.innerHTML='<span style="color:var(--text3)">No actions in this period.</span>';return;}
+    const byType={};actions.forEach(a=>{byType[a.Type||'Other']=(byType[a.Type||'Other']||0)+1;});
+    const typeBreakdown=Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span style="margin-right:12px"><strong>${n}</strong> ${t}</span>`).join('');
+    const apps=new Set(actions.map(a=>a['Application ID'])).size;
+    statsEl.innerHTML=`<div style="margin-bottom:6px;font-weight:600;color:var(--text2);text-transform:uppercase;font-size:10px;letter-spacing:.5px">Period summary</div><div style="margin-bottom:6px"><strong style="font-size:16px">${actions.length}</strong> actions across <strong>${apps}</strong> applications</div><div style="color:var(--text2);line-height:2">${typeBreakdown}</div>`;
+  }catch(ex){statsEl.innerHTML='<span style="color:var(--rose)">Error loading stats.</span>';}
+}
+
 function openPdfModal(){
   const now=new Date();
   document.getElementById('pdf-from').value=new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0];
   document.getElementById('pdf-to').value=now.toISOString().split('T')[0];
+  document.getElementById('pdf-stats').style.display='none';
   document.getElementById('pdf-ov').classList.add('open');
+  setTimeout(loadPdfStats,100);
 }
 
 async function generatePdf(){
@@ -688,11 +714,23 @@ async function generatePdf(){
   if(!from||!to){alert('Please select a date range.');return;}
   const btn=document.getElementById('pdf-gen-btn');btn.disabled=true;btn.textContent='Generating...';
   try{
-    const formula=encodeURIComponent(`AND({Date}>="${from}",{Date}<="${to}")`);
+    // Add one day to "to" so today's records are included (Airtable date comparison is exclusive)
+    const toNext=new Date(to+'T12:00:00');toNext.setDate(toNext.getDate()+1);
+    const toAdj=toNext.toISOString().split('T')[0];
+    const formula=encodeURIComponent(`AND({Date}>="${from}",{Date}<"${toAdj}")`);
     const r=await fetch(`${W}/api/actions?pageSize=100&filterByFormula=${formula}&sort[0][field]=Date&sort[0][direction]=asc`);
     const d=await r.json();
     const actions=(d.records||[]).map(x=>({id:x.id,...x.fields}));
     if(!actions.length){alert('No actions found in that date range.');btn.disabled=false;btn.textContent='Export PDF';return;}
+    // Show stats preview
+    const statsEl=document.getElementById('pdf-stats');
+    if(statsEl){
+      const byType={};actions.forEach(a=>{byType[a.Type||'Other']=(byType[a.Type||'Other']||0)+1;});
+      const typeBreakdown=Object.entries(byType).sort((a,b)=>b[1]-a[1]).map(([t,n])=>`<span style="margin-right:12px"><strong>${n}</strong> ${t}</span>`).join('');
+      const apps=new Set(actions.map(a=>a['Application ID'])).size;
+      statsEl.style.display='block';
+      statsEl.innerHTML=`<div style="margin-bottom:6px;font-weight:600;color:var(--text2);text-transform:uppercase;font-size:10px;letter-spacing:.5px">Preview</div><div style="margin-bottom:4px"><strong>${actions.length}</strong> actions across <strong>${apps}</strong> applications</div><div style="color:var(--text2)">${typeBreakdown}</div>`;
+    }
     const grouped={};
     actions.forEach(a=>{const k=a['Application ID']||'x';if(!grouped[k])grouped[k]={company:a.Company||'',role:a.Role||'',actions:[]};grouped[k].actions.push(a);});
     const fmt=d=>new Date(d+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
@@ -746,6 +784,8 @@ function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replac
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
 document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){['pipeline-ov','company-ov','history-ov','pdf-ov'].forEach(id=>closeModal(id));}});
 document.getElementById('pwd-input').addEventListener('keydown',ev=>{if(ev.key==='Enter')checkAuth();});
+document.getElementById('pdf-from').addEventListener('change',loadPdfStats);
+document.getElementById('pdf-to').addEventListener('change',loadPdfStats);
 </script>
 </body>
 </html>
