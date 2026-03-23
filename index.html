@@ -324,18 +324,24 @@ let pSortK='Date Applied',pSortD=-1,cSortK='Revenue',cSortD=-1,gSearch='';
 const PS={Applied:{bg:'var(--sky-lt)',c:'var(--sky)'},Screening:{bg:'var(--amber-lt)',c:'var(--amber)'},Interview:{bg:'var(--sage-lt)',c:'var(--sage)'},Offer:{bg:'var(--plum-lt)',c:'var(--plum)'},Rejected:{bg:'var(--rose-lt)',c:'var(--rose)'},'No answer':{bg:'var(--slate-lt)',c:'var(--slate)'}};
 const CS={Interesting:{bg:'var(--sky-lt)',c:'var(--sky)'},Watch:{bg:'var(--amber-lt)',c:'var(--amber)'},Contacted:{bg:'var(--sage-lt)',c:'var(--sage)'},Discarded:{bg:'var(--rose-lt)',c:'var(--rose)'}};
 
+const SESSION_KEY='jp_auth';
+const SESSION_TTL=24*60*60*1000;
+function checkSession(){try{const s=sessionStorage.getItem(SESSION_KEY);if(!s)return false;return Date.now()-JSON.parse(s).ts<SESSION_TTL;}catch(e){return false;}}
+function saveSession(){try{sessionStorage.setItem(SESSION_KEY,JSON.stringify({ts:Date.now()}));}catch(e){}}
+function enterApp(){document.getElementById('auth-screen').style.display='none';document.getElementById('app').style.display='block';loadPipeline();loadCompanies();}
+
 async function checkAuth(){
   const v=document.getElementById('pwd-input').value.trim();if(!v)return;
   const b=document.getElementById('auth-btn');b.disabled=true;b.textContent='Checking...';
   try{const r=await fetch(`${W}/api/config`);const d=await r.json();
     if(d.records?.[0]?.fields['Value']===v){
-      document.getElementById('auth-screen').style.display='none';
-      document.getElementById('app').style.display='block';
-      loadPipeline();loadCompanies();
+      saveSession();enterApp();
     }else{const e=document.getElementById('auth-error');e.style.display='block';e.style.animation='none';requestAnimationFrame(()=>{e.style.animation='';});document.getElementById('pwd-input').value='';document.getElementById('pwd-input').focus();}
   }catch(e){document.getElementById('auth-error').textContent='Connection error.';document.getElementById('auth-error').style.display='block';}
   b.disabled=false;b.textContent='Access →';
 }
+
+if(checkSession()){enterApp();}
 
 function onGlobalSearch(v){gSearch=v.toLowerCase();renderPipeline();renderCompanies();}
 function switchTab(t,b){document.querySelectorAll('.tab-btn').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.tab-pane').forEach(x=>x.classList.remove('active'));b.classList.add('active');document.getElementById('tab-'+t).classList.add('active');}
