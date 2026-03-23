@@ -410,7 +410,7 @@ function renderPipeline(){
     <td><span class="sm">${e(r['Next Step']||'')}</span></td>
     <td><div class="acts">
       <button class="ib" onclick="openPipelineModal('${r.id}')">✎</button>
-      <button class="ib hist" onclick="openHistory('${r.id}','${e(r['Company']||'')}','${e(r['Role']||'')}')" title="History">⏱</button>
+      <button class="ib hist" onclick="openHistory('${r.id}','${e(r['Company']||'')}','${e(r['Role']||'')}')" title="History" style="font-size:11px;padding:5px 9px;letter-spacing:-.2px">Log</button>
       <button class="ib del" onclick="delP('${r.id}')">✕</button>
     </div></td></tr>`;
   }).join('')}</tbody></table>`;
