@@ -152,6 +152,17 @@ textarea{resize:vertical;min-height:68px}
 /* TOAST */
 .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(8px);background:var(--text);color:#fff;font-size:13px;font-weight:500;padding:10px 20px;border-radius:var(--r);opacity:0;transition:opacity .25s,transform .25s;z-index:200;pointer-events:none;box-shadow:var(--shmd);white-space:nowrap}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.ib.hist:hover{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
+.hist-btn{flex:1;font-family:inherit;font-size:12px;font-weight:500;padding:7px;border-radius:8px;cursor:pointer;transition:all .15s;border:1.5px solid var(--border);background:none;color:var(--text2)}
+.hist-btn:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-lt)}
+.action-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.action-item:last-child{border-bottom:none}
+.action-dot{width:8px;height:8px;border-radius:50%;background:var(--sage);flex-shrink:0;margin-top:5px}
+.action-meta{font-size:11px;color:var(--text3);margin-top:3px}
+.action-type-badge{display:inline-block;font-size:10px;font-weight:600;padding:2px 8px;border-radius:12px;background:var(--amber-lt);color:var(--amber);margin-right:6px}
+.pdf-range{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px;padding:12px;background:var(--bg);border-radius:var(--r);border:1px solid var(--border)}
+.pdf-range label{font-size:12px;color:var(--text2);white-space:nowrap}
+.pdf-range input{width:140px;font-size:12px;padding:6px 8px}
 
 /* RESPONSIVE */
 @media(min-width:769px){
@@ -313,8 +324,61 @@ textarea{resize:vertical;min-height:68px}
 
 <div class="toast" id="toast"></div>
 
+<!-- HISTORY MODAL -->
+<div class="ov" id="history-ov" onclick="closeIfOutside(event,'history-ov')">
+  <div class="modal" style="max-width:600px">
+    <h3 id="history-title">History</h3>
+    <div id="history-list" style="max-height:300px;overflow-y:auto;margin-bottom:16px"></div>
+    <div style="border-top:1px solid var(--border);padding-top:16px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px">Add action</div>
+      <div class="r2">
+        <div class="field"><label>Date *</label><input type="date" id="ha-date"></div>
+        <div class="field"><label>Type *</label>
+          <select id="ha-type">
+            <option value="">Select...</option>
+            <option value="Applied">Applied</option>
+            <option value="Reminder sent">Reminder sent</option>
+            <option value="Screening call">Screening call</option>
+            <option value="Interview">Interview</option>
+            <option value="Offer received">Offer received</option>
+            <option value="Rejected">Rejected</option>
+            <option value="Follow up">Follow up</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Description</label><textarea id="ha-desc" style="min-height:52px" placeholder="What happened?"></textarea></div>
+      <div class="field"><label>Contact</label><input id="ha-contact" placeholder="e.g. Sarah Johnson"></div>
+    </div>
+    <div class="mf">
+      <button class="bcl" onclick="closeModal('history-ov')">Close</button>
+      <button class="bcl" onclick="openPdfModal()" style="margin-right:auto;color:var(--sage);border-color:var(--sage)">Export PDF</button>
+      <button class="bsv" id="ha-save-btn" onclick="saveAction()">Add action</button>
+    </div>
+  </div>
+</div>
+
+<!-- PDF MODAL -->
+<div class="ov" id="pdf-ov" onclick="closeIfOutside(event,'pdf-ov')">
+  <div class="modal" style="max-width:480px">
+    <h3>Export activity report</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Actions grouped by application for the selected date range.</p>
+    <div class="pdf-range">
+      <label>From</label>
+      <input type="date" id="pdf-from">
+      <label>To</label>
+      <input type="date" id="pdf-to">
+    </div>
+    <div class="mf">
+      <button class="bcl" onclick="closeModal('pdf-ov')">Cancel</button>
+      <button class="bsv" onclick="generatePdf()">Generate PDF</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const W='https://jc-pipeline.jcarloscsva.workers.dev';
+const ACTION_TYPES=['Applied','Reminder sent','Screening call','Interview','Offer received','Rejected','Follow up','Other'];
 let PD=[],CD=[],pEditId=null,cEditId=null,pFilter='all',cFilter='all';
 let pSortK='Date Applied',pSortD=-1,cSortK='Employees',cSortD=-1,gSearch='';
 
@@ -379,7 +443,7 @@ function renderPipeline(){
     <td><span class="mono">${dt}</span></td>
     <td><div class="cm" style="font-size:12px">${e(r['Recruiter Name']||'')}</div><div class="cs">${e(r['Recruiter Contact']||'')}</div></td>
     <td><span class="sm">${e(r['Next Step']||'')}</span></td>
-    <td><div class="acts"><button class="ib" onclick="openPipelineModal('${r.id}')">✎</button><button class="ib del" onclick="delP('${r.id}')">✕</button></div></td></tr>`;
+    <td><div class="acts"><button class="ib" onclick="openPipelineModal('${r.id}')">✎</button><button class="ib hist" onclick="openHistory('${r.id}','${e(r["Company"]||"")}','${e(r["Role"]||"")}')" title="History">⏱</button><button class="ib del" onclick="delP('${r.id}')">✕</button></div></td></tr>`;
   }).join('')}</tbody></table>`;
   // Mobile cards
   cards.innerHTML=rows.map(r=>{
@@ -398,6 +462,7 @@ function renderPipeline(){
       </div>
       <div class="card-acts">
         <button class="edit-btn" onclick="openPipelineModal('${r.id}')">Edit</button>
+        <button class="hist-btn" onclick="openHistory('${r.id}','${e(r['Company']||"")}','${e(r['Role']||"")}')">History</button>
         <button class="del-btn" onclick="delP('${r.id}')">Remove</button>
       </div>
     </div>`;
@@ -560,8 +625,183 @@ function closeModal(id){document.getElementById(id).classList.remove('open');pEd
 function closeIfOutside(ev,id){if(ev.target===document.getElementById(id))closeModal(id);}
 function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeModal('pipeline-ov');closeModal('company-ov');}});
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeModal('pipeline-ov');closeModal('company-ov');closeModal('history-ov');closeModal('pdf-ov');}});
 document.getElementById('pwd-input').addEventListener('keydown',ev=>{if(ev.key==='Enter')checkAuth();});
+
+// HISTORY
+let histAppId=null,histActions=[];
+
+async function openHistory(appId,company,role){
+  histAppId=appId;
+  document.getElementById('history-title').textContent=company+(role?' — '+role:'');
+  document.getElementById('ha-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('ha-type').value='';
+  document.getElementById('ha-desc').value='';
+  document.getElementById('ha-contact').value='';
+  document.getElementById('history-list').innerHTML='<div class="loading"></div>';
+  document.getElementById('history-ov').classList.add('open');
+  await loadActions(appId);
+}
+
+async function loadActions(appId){
+  try{
+    const url=`${W}/api/actions?pageSize=100&filterByFormula={Application+ID}="${appId}"&sort[0][field]=Date&sort[0][direction]=desc`;
+    const r=await fetch(url);
+    const d=await r.json();
+    histActions=d.records||[];
+    renderActions();
+  }catch(e){document.getElementById('history-list').innerHTML='<div class="empty">Error loading history.</div>';}
+}
+
+function renderActions(){
+  const el=document.getElementById('history-list');
+  if(!histActions.length){el.innerHTML='<div class="empty" style="padding:24px">No actions yet. Add the first one below.</div>';return;}
+  el.innerHTML=histActions.map(a=>{
+    const f=a.fields;
+    const dt=f.Date?new Date(f.Date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
+    return`<div class="action-item">
+      <div class="action-dot"></div>
+      <div style="flex:1">
+        <div><span class="action-type-badge">${e(f.Type||'')}</span>${e(f.Description||'')}</div>
+        <div class="action-meta">${dt}${f.Contact?' · '+e(f.Contact):''}</div>
+      </div>
+      <button class="ib del" onclick="delAction('${a.id}')" style="align-self:flex-start">✕</button>
+    </div>`;
+  }).join('');
+}
+
+async function saveAction(){
+  const date=document.getElementById('ha-date').value;
+  const type=document.getElementById('ha-type').value;
+  if(!date||!type){alert('Date and type are required.');return;}
+  const app=PD.find(x=>x.id===histAppId);
+  const fields={
+    'Application ID':histAppId,
+    'Company':app?.Company||'',
+    'Role':app?.Role||'',
+    'Date':date,
+    'Type':type,
+    'Description':document.getElementById('ha-desc').value.trim(),
+    'Contact':document.getElementById('ha-contact').value.trim()
+  };
+  const btn=document.getElementById('ha-save-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=await fetch(`${W}/api/actions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+    const d=await r.json();
+    histActions.unshift({id:d.id,...d.fields});
+    renderActions();
+    document.getElementById('ha-type').value='';
+    document.getElementById('ha-desc').value='';
+    document.getElementById('ha-contact').value='';
+    document.getElementById('ha-date').value=new Date().toISOString().split('T')[0];
+    toast('Action added ✓');
+  }catch(e){alert('Error saving.');}
+  btn.disabled=false;btn.textContent='Add action';
+}
+
+async function delAction(id){
+  if(!confirm('Remove this action?'))return;
+  try{
+    await fetch(`${W}/api/actions/${id}`,{method:'DELETE'});
+    histActions=histActions.filter(x=>x.id!==id);
+    renderActions();toast('Action removed');
+  }catch(e){alert('Error.');}
+}
+
+// PDF
+function openPdfModal(){
+  const now=new Date();
+  const from=new Date(now.getFullYear(),now.getMonth(),1).toISOString().split('T')[0];
+  const to=now.toISOString().split('T')[0];
+  document.getElementById('pdf-from').value=from;
+  document.getElementById('pdf-to').value=to;
+  document.getElementById('pdf-ov').classList.add('open');
+}
+
+async function generatePdf(){
+  const from=document.getElementById('pdf-from').value;
+  const to=document.getElementById('pdf-to').value;
+  if(!from||!to){alert('Please select a date range.');return;}
+
+  // Fetch all actions in range
+  const formula=`AND({Date}>="${from}",{Date}<="${to}")`;
+  const url=`${W}/api/actions?pageSize=100&filterByFormula=${encodeURIComponent(formula)}&sort[0][field]=Date&sort[0][direction]=asc`;
+  const r=await fetch(url);
+  const d=await r.json();
+  const actions=d.records||[];
+
+  if(!actions.length){alert('No actions found in that date range.');return;}
+
+  // Group by Application ID
+  const grouped={};
+  actions.forEach(a=>{
+    const f=a.fields;
+    const key=f['Application ID']||'unknown';
+    if(!grouped[key])grouped[key]={company:f.Company||'',role:f.Role||'',actions:[]};
+    grouped[key].actions.push(f);
+  });
+
+  // Build HTML for PDF
+  const fromFmt=new Date(from+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const toFmt=new Date(to+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'long',year:'numeric'});
+  const totalActions=actions.length;
+  const totalApps=Object.keys(grouped).length;
+
+  let body=`<html><head><meta charset="UTF-8"><style>
+    body{font-family:Arial,sans-serif;color:#1E1C18;margin:40px;font-size:13px;line-height:1.6}
+    h1{font-size:20px;margin-bottom:4px;color:#1E1C18}
+    .sub{color:#6B6760;font-size:13px;margin-bottom:24px}
+    .summary{display:flex;gap:24px;margin-bottom:28px;padding:16px;background:#F7F6F3;border-radius:8px}
+    .sm-item{text-align:center}.sm-num{font-size:22px;font-weight:700;color:#2D5BE3}
+    .sm-lbl{font-size:11px;color:#6B6760;text-transform:uppercase;letter-spacing:.5px}
+    .app-block{margin-bottom:24px;border:1px solid #E4E1DA;border-radius:8px;overflow:hidden}
+    .app-header{background:#F7F6F3;padding:10px 14px;border-bottom:1px solid #E4E1DA}
+    .app-name{font-weight:700;font-size:14px}
+    .app-role{color:#6B6760;font-size:12px}
+    table{width:100%;border-collapse:collapse}
+    td{padding:8px 14px;border-bottom:1px solid #F0EDE8;font-size:12px;vertical-align:top}
+    tr:last-child td{border-bottom:none}
+    .badge{display:inline-block;padding:2px 8px;border-radius:12px;background:#FBF3E6;color:#C9A46B;font-size:10px;font-weight:700}
+    .date-col{color:#A09C95;white-space:nowrap;width:90px}
+    .contact-col{color:#6B6760;width:120px}
+    .footer{margin-top:32px;padding-top:12px;border-top:1px solid #E4E1DA;color:#A09C95;font-size:11px;text-align:center}
+  </style></head><body>
+    <h1>Activity Report</h1>
+    <div class="sub">${fromFmt} to ${toFmt}</div>
+    <div class="summary">
+      <div class="sm-item"><div class="sm-num">${totalActions}</div><div class="sm-lbl">Actions</div></div>
+      <div class="sm-item"><div class="sm-num">${totalApps}</div><div class="sm-lbl">Applications</div></div>
+    </div>`;
+
+  Object.values(grouped).forEach(g=>{
+    body+=`<div class="app-block">
+      <div class="app-header">
+        <div class="app-name">${e(g.company)}</div>
+        <div class="app-role">${e(g.role)}</div>
+      </div>
+      <table>`;
+    g.actions.forEach(a=>{
+      const dt=a.Date?new Date(a.Date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+      body+=`<tr>
+        <td class="date-col">${dt}</td>
+        <td><span class="badge">${e(a.Type||'')}</span> ${e(a.Description||'')}</td>
+        <td class="contact-col">${e(a.Contact||'')}</td>
+      </tr>`;
+    });
+    body+=`</table></div>`;
+  });
+
+  body+=`<div class="footer">Generated by Job Pipeline · Juan Carlos Castillo · jcastillo.es</div></body></html>`;
+
+  // Open print dialog
+  const w=window.open('','_blank');
+  w.document.write(body);
+  w.document.close();
+  w.focus();
+  setTimeout(()=>{w.print();},500);
+  closeModal('pdf-ov');
+}
 </script>
 </body>
 </html>
