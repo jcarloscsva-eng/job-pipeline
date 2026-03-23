@@ -196,6 +196,13 @@ textarea{resize:vertical;min-height:68px}
       <button class="rptbtn" onclick="openPdfModal()">⬇ Report</button>
       <button class="addbtn" onclick="openPipelineModal()">+ Add</button>
     </div>
+    <div id="pipeline-chart-wrap" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--rlg);padding:16px 20px 12px;margin-bottom:14px;box-shadow:var(--sh);display:none">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:var(--text3)">Applications per day</div>
+        <div id="chart-total-label" style="font-size:11px;color:var(--text3)"></div>
+      </div>
+      <canvas id="pipeline-chart" style="width:100%;height:80px;display:block"></canvas>
+    </div>
     <div class="tbl-wrap" id="pipeline-table"></div>
     <div class="card-list" id="pipeline-cards"></div>
   </div>
@@ -443,6 +450,128 @@ function updatePipelineStats(){
   document.getElementById('st-interview').textContent=PD.filter(r=>r['Status']==='Interview').length;
   document.getElementById('st-offer').textContent=PD.filter(r=>r['Status']==='Offer').length;
   document.getElementById('st-week').textContent=PD.filter(r=>r['Date Applied']&&new Date(r['Date Applied'])>=wa).length;
+  renderPipelineChart();
+}
+
+function renderPipelineChart(){
+  const canvas=document.getElementById('pipeline-chart');
+  const wrap=document.getElementById('pipeline-chart-wrap');
+  if(!canvas||!wrap)return;
+
+  // Build last 30 days
+  const days=30;
+  const today=new Date();today.setHours(0,0,0,0);
+  const labels=[],counts=[];
+  for(let i=days-1;i>=0;i--){
+    const d=new Date(today);d.setDate(d.getDate()-i);
+    labels.push(d.toISOString().split('T')[0]);
+    counts.push(0);
+  }
+
+  // Count applications per day
+  PD.forEach(r=>{
+    if(!r['Date Applied'])return;
+    const idx=labels.indexOf(r['Date Applied']);
+    if(idx>=0)counts[idx]++;
+  });
+
+  const maxCount=Math.max(...counts,1);
+  const hasData=counts.some(c=>c>0);
+  if(!hasData){wrap.style.display='none';return;}
+  wrap.style.display='block';
+
+  // Set canvas actual size
+  const dpr=window.devicePixelRatio||1;
+  const rect=canvas.getBoundingClientRect();
+  const W=canvas.offsetWidth||rect.width||600;
+  const H=80;
+  canvas.width=W*dpr;
+  canvas.height=H*dpr;
+  canvas.style.width=W+'px';
+  canvas.style.height=H+'px';
+
+  const ctx=canvas.getContext('2d');
+  ctx.scale(dpr,dpr);
+  ctx.clearRect(0,0,W,H);
+
+  const padL=4,padR=4,padT=8,padB=20;
+  const chartW=W-padL-padR;
+  const chartH=H-padT-padB;
+  const stepX=chartW/(days-1);
+
+  // Grid lines
+  ctx.strokeStyle='#E4E1DA';
+  ctx.lineWidth=1;
+  for(let g=0;g<=maxCount;g++){
+    const y=padT+chartH-(g/maxCount)*chartH;
+    ctx.beginPath();ctx.moveTo(padL,y);ctx.lineTo(padL+chartW,y);
+    ctx.setLineDash([3,3]);ctx.stroke();ctx.setLineDash([]);
+  }
+
+  // Gradient fill
+  const grad=ctx.createLinearGradient(0,padT,0,padT+chartH);
+  grad.addColorStop(0,'rgba(124,154,142,0.25)');
+  grad.addColorStop(1,'rgba(124,154,142,0.02)');
+  ctx.fillStyle=grad;
+  ctx.beginPath();
+  ctx.moveTo(padL,padT+chartH);
+  counts.forEach((c,i)=>{
+    const x=padL+i*stepX;
+    const y=padT+chartH-(c/maxCount)*chartH;
+    i===0?ctx.lineTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.lineTo(padL+chartW,padT+chartH);
+  ctx.closePath();ctx.fill();
+
+  // Line
+  ctx.strokeStyle='#7C9A8E';
+  ctx.lineWidth=2;
+  ctx.lineJoin='round';
+  ctx.lineCap='round';
+  ctx.beginPath();
+  counts.forEach((c,i)=>{
+    const x=padL+i*stepX;
+    const y=padT+chartH-(c/maxCount)*chartH;
+    i===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+
+  // Dots and labels for days with applications
+  counts.forEach((c,i)=>{
+    if(c===0)return;
+    const x=padL+i*stepX;
+    const y=padT+chartH-(c/maxCount)*chartH;
+    ctx.fillStyle='#7C9A8E';
+    ctx.beginPath();ctx.arc(x,y,3.5,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';
+    ctx.beginPath();ctx.arc(x,y,1.5,0,Math.PI*2);ctx.fill();
+    // Count label above dot
+    ctx.fillStyle='#4E7A6C';
+    ctx.font='bold 10px Plus Jakarta Sans,Arial,sans-serif';
+    ctx.textAlign='center';
+    ctx.fillText(c,x,y-6);
+  });
+
+  // X axis date labels — only show Mon or days with activity
+  ctx.fillStyle='#A09C95';
+  ctx.font='9px Plus Jakarta Sans,Arial,sans-serif';
+  ctx.textAlign='center';
+  labels.forEach((lbl,i)=>{
+    const d=new Date(lbl+'T12:00:00');
+    const isToday=lbl===today.toISOString().split('T')[0];
+    const isMonday=d.getDay()===1;
+    if(!isToday&&!isMonday&&counts[i]===0)return;
+    const x=padL+i*stepX;
+    const txt=isToday?'Today':d.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+    ctx.fillStyle=isToday?'#4E7A6C':'#A09C95';
+    ctx.font=isToday?'bold 9px Plus Jakarta Sans,Arial,sans-serif':'9px Plus Jakarta Sans,Arial,sans-serif';
+    ctx.fillText(txt,x,H-4);
+  });
+
+  // Total label
+  const totalApps=counts.reduce((a,b)=>a+b,0);
+  const activeDays=counts.filter(c=>c>0).length;
+  document.getElementById('chart-total-label').textContent=totalApps+' application'+(totalApps!==1?'s':'')+' across '+activeDays+' day'+(activeDays!==1?'s':'')+' (last 30 days)';
 }
 
 // COMPANIES
@@ -792,6 +921,7 @@ document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){['pipeline-ov','c
 document.getElementById('pwd-input').addEventListener('keydown',ev=>{if(ev.key==='Enter')checkAuth();});
 document.getElementById('pdf-from').addEventListener('change',loadPdfStats);
 document.getElementById('pdf-to').addEventListener('change',loadPdfStats);
+window.addEventListener('resize',()=>{if(document.getElementById('tab-pipeline').classList.contains('active'))renderPipelineChart();});
 </script>
 </body>
 </html>
