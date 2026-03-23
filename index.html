@@ -155,6 +155,19 @@ textarea{resize:vertical;min-height:68px}
 .ib.hist:hover{background:var(--amber-lt);border-color:var(--amber);color:var(--amber)}
 .hist-btn{flex:1;font-family:inherit;font-size:12px;font-weight:500;padding:7px;border-radius:8px;cursor:pointer;transition:all .15s;border:1.5px solid var(--border);background:none;color:var(--text2)}
 .hist-btn:hover{border-color:var(--amber);color:var(--amber);background:var(--amber-lt)}
+.act-btn{flex:1;font-family:inherit;font-size:12px;font-weight:600;padding:7px;border-radius:8px;cursor:pointer;transition:all .15s;border:1.5px solid var(--sage);background:var(--sage-lt);color:var(--sage)}
+.act-btn:hover{background:var(--sage);color:#fff}
+.ib.add-act{border-color:var(--sage-lt);color:var(--sage)}
+.ib.add-act:hover{background:var(--sage-lt);border-color:var(--sage);color:var(--sage)}
+.badge-scheduled{display:inline-block;padding:2px 8px;border-radius:12px;background:#EAF2FB;color:#2D5BE3;font-size:10px;font-weight:700}
+.badge-done{display:inline-block;padding:2px 8px;border-radius:12px;background:#E8F5EE;color:#2D7A4F;font-size:10px;font-weight:700}
+.action-future{background:#F8F9FF;border-left:3px solid #2D5BE3}
+.ib.add-act:hover{background:var(--sage-lt);border-color:var(--sage);color:var(--sage)}
+.action-pending{border-left:3px solid var(--amber);padding-left:8px}
+.action-done{border-left:3px solid var(--sage);padding-left:8px}
+.action-dot-pending{background:var(--amber)}
+.action-dot-done{background:var(--sage)}
+.pending-badge{display:inline-block;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px;background:var(--amber-lt);color:var(--amber);margin-left:6px;text-transform:uppercase;letter-spacing:.4px}
 .action-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
 .action-item:last-child{border-bottom:none}
 .action-dot{width:8px;height:8px;border-radius:50%;background:var(--sage);flex-shrink:0;margin-top:5px}
@@ -325,6 +338,87 @@ textarea{resize:vertical;min-height:68px}
 
 <div class="toast" id="toast"></div>
 
+<!-- QUICK ACTION MODAL -->
+<div class="ov" id="qa-ov" onclick="closeIfOutside(event,'qa-ov')">
+  <div class="modal" style="max-width:420px">
+    <h3 id="qa-title">Add action</h3>
+    <div class="r2">
+      <div class="field">
+        <label>Date *</label>
+        <input type="date" id="qa-date">
+      </div>
+      <div class="field">
+        <label>Type *</label>
+        <select id="qa-type">
+          <option value="">Select...</option>
+          <option value="Applied">Applied</option>
+          <option value="Reminder sent">Reminder sent</option>
+          <option value="Screening call">Screening call</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer received">Offer received</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Follow up">Follow up</option>
+          <option value="Task: Send reminder">Task: Send reminder</option>
+          <option value="Task: Follow up">Task: Follow up</option>
+          <option value="Task: Prepare interview">Task: Prepare interview</option>
+          <option value="Task: Research company">Task: Research company</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label>Description</label>
+      <textarea id="qa-desc" style="min-height:52px" placeholder="What happened or what needs to be done?"></textarea>
+    </div>
+    <div class="field">
+      <label>Contact</label>
+      <input id="qa-contact" placeholder="e.g. Sarah Johnson">
+    </div>
+    <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--bg);border-radius:var(--r);margin-bottom:4px;font-size:12px;color:var(--text2)">
+      <span>📅</span> Dates in the future will be saved as <strong style="color:var(--amber)">pending tasks</strong>
+    </div>
+    <div class="mf">
+      <button class="bcl" onclick="closeModal('qa-ov')">Cancel</button>
+      <button class="bsv" id="qa-save-btn" onclick="saveQuickAction()">Add action</button>
+    </div>
+  </div>
+</div>
+
+<!-- QUICK ACTION MODAL -->
+<div class="ov" id="quick-action-ov" onclick="closeIfOutside(event,'quick-action-ov')">
+  <div class="modal" style="max-width:440px">
+    <h3 id="qa-title">Add action</h3>
+    <div class="r2">
+      <div class="field"><label>Date *</label><input type="date" id="qa-date"></div>
+      <div class="field"><label>Type *</label>
+        <select id="qa-type">
+          <option value="">Select...</option>
+          <option value="Applied">Applied</option>
+          <option value="Reminder sent">Reminder sent</option>
+          <option value="Screening call">Screening call</option>
+          <option value="Interview">Interview</option>
+          <option value="Offer received">Offer received</option>
+          <option value="Rejected">Rejected</option>
+          <option value="Follow up">Follow up</option>
+          <option value="Send reminder">Send reminder</option>
+          <option value="Call scheduled">Call scheduled</option>
+          <option value="Task">Task</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Description</label><textarea id="qa-desc" style="min-height:60px" placeholder="What happened or what needs to be done?"></textarea></div>
+    <div class="field"><label>Contact</label><input id="qa-contact" placeholder="e.g. Sarah Johnson"></div>
+    <div id="qa-scheduled-note" style="display:none;font-size:12px;color:var(--sky);background:var(--sky-lt);padding:8px 12px;border-radius:8px;margin-top:4px">
+      ⏰ This is a future date — this action will be saved as a scheduled task.
+    </div>
+    <div class="mf">
+      <button class="bcl" onclick="closeModal('quick-action-ov')">Cancel</button>
+      <button class="bsv" id="qa-save-btn" onclick="saveQuickAction()">Save action</button>
+    </div>
+  </div>
+</div>
+
 <!-- HISTORY MODAL -->
 <div class="ov" id="history-ov" onclick="closeIfOutside(event,'history-ov')">
   <div class="modal" style="max-width:600px">
@@ -442,7 +536,7 @@ function renderPipeline(){
     <td><span class="mono">${dt}</span></td>
     <td><div class="cm" style="font-size:12px">${e(r['Recruiter Name']||'')}</div><div class="cs">${e(r['Recruiter Contact']||'')}</div></td>
     <td><span class="sm">${e(r['Next Step']||'')}</span></td>
-    <td><div class="acts"><button class="ib" onclick="openPipelineModal('${r.id}')">✎</button><button class="ib hist" onclick="openHistory('${r.id}','${e(r["Company"]||"")}','${e(r["Role"]||"")}')" title="History">⏱</button><button class="ib del" onclick="delP('${r.id}')">✕</button></div></td></tr>`;
+    <td><div class="acts"><button class="ib" onclick="openPipelineModal('${r.id}')">✎</button><button class="ib hist" onclick="openHistory('${r.id}','${e(r["Company"]||"")}','${e(r["Role"]||"")}')" title="History">⏱</button><button class="ib add-act" onclick="openQuickAction('${r.id}','${e(r["Company"]||"")}','${e(r["Role"]||"")}')" title="Add action">+</button><button class="ib del" onclick="delP('${r.id}')">✕</button></div></td></tr>`;
   }).join('')}</tbody></table>`;
   // Mobile cards
   cards.innerHTML=rows.map(r=>{
@@ -462,6 +556,7 @@ function renderPipeline(){
       <div class="card-acts">
         <button class="edit-btn" onclick="openPipelineModal('${r.id}')">Edit</button>
         <button class="hist-btn" onclick="openHistory('${r.id}','${e(r['Company']||"")}','${e(r['Role']||"")}')">History</button>
+        <button class="hist-btn" onclick="openQuickAction('${r.id}','${e(r['Company']||"")}','${e(r['Role']||"")}')">+ Action</button>
         <button class="del-btn" onclick="delP('${r.id}')">Remove</button>
       </div>
     </div>`;
@@ -624,7 +719,47 @@ function closeModal(id){document.getElementById(id).classList.remove('open');pEd
 function closeIfOutside(ev,id){if(ev.target===document.getElementById(id))closeModal(id);}
 function e(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2600);}
-document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeModal('pipeline-ov');closeModal('company-ov');closeModal('history-ov');closeModal('pdf-ov');}});
+// QUICK ACTION
+let qaAppId=null;
+function openQuickAction(appId,company,role){
+  qaAppId=appId;
+  document.getElementById('qa-title').textContent='Add action: '+company+(role?' — '+role:'');
+  document.getElementById('qa-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('qa-type').value='';
+  document.getElementById('qa-desc').value='';
+  document.getElementById('qa-contact').value='';
+  document.getElementById('qa-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('qa-type').focus(),80);
+}
+
+async function saveQuickAction(){
+  const date=document.getElementById('qa-date').value;
+  const type=document.getElementById('qa-type').value;
+  if(!date||!type){alert('Date and type are required.');return;}
+  const app=PD.find(x=>x.id===qaAppId);
+  const fields={
+    'Application ID':qaAppId,
+    'Company':app?.Company||'',
+    'Role':app?.Role||'',
+    'Date':date,
+    'Type':type,
+    'Description':document.getElementById('qa-desc').value.trim(),
+    'Contact':document.getElementById('qa-contact').value.trim()
+  };
+  const btn=document.getElementById('qa-save-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=await fetch(`${W}/api/actions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+    const d=await r.json();
+    closeModal('qa-ov');
+    const today=new Date().toISOString().split('T')[0];
+    const isPending=date>today;
+    toast(isPending?'Task scheduled ✓':'Action added ✓');
+  }catch(e){alert('Error saving.');}
+  btn.disabled=false;btn.textContent='Add action';
+}
+
+document.addEventListener('keydown',ev=>{if(ev.key==='Escape'){closeModal('pipeline-ov');closeModal('company-ov');closeModal('history-ov');closeModal('pdf-ov');closeModal('qa-ov');}});
 document.getElementById('pwd-input').addEventListener('keydown',ev=>{if(ev.key==='Enter')checkAuth();});
 
 // HISTORY
@@ -655,13 +790,20 @@ async function loadActions(appId){
 function renderActions(){
   const el=document.getElementById('history-list');
   if(!histActions.length){el.innerHTML='<div class="empty" style="padding:24px">No actions yet. Add the first one below.</div>';return;}
+  const today=new Date().toISOString().split('T')[0];
   el.innerHTML=histActions.map(a=>{
     const f=a.fields;
+    const today=new Date().toISOString().split('T')[0];
     const dt=f.Date?new Date(f.Date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
-    return`<div class="action-item">
-      <div class="action-dot"></div>
+    const isScheduled=f.Date&&f.Date>today;
+    const rowStyle=isScheduled?'border-left:3px solid var(--sky);background:#F8F9FF;padding-left:10px':'';
+    const dotColor=isScheduled?'background:var(--sky)':'';
+    const badgeCls=isScheduled?'badge-scheduled':'action-type-badge';
+    const tag=isScheduled?'<span style="font-size:10px;color:var(--sky);font-weight:600;margin-left:6px">⏰ Scheduled</span>':'';
+    return`<div class="action-item" style="${rowStyle}">
+      <div class="action-dot" style="${dotColor}"></div>
       <div style="flex:1">
-        <div><span class="action-type-badge">${e(f.Type||'')}</span>${e(f.Description||'')}</div>
+        <div><span class="${badgeCls}">${e(f.Type||'')}</span>${tag} ${e(f.Description||'')}</div>
         <div class="action-meta">${dt}${f.Contact?' · '+e(f.Contact):''}</div>
       </div>
       <button class="ib del" onclick="delAction('${a.id}')" style="align-self:flex-start">✕</button>
@@ -706,6 +848,55 @@ async function delAction(id){
     histActions=histActions.filter(x=>x.id!==id);
     renderActions();toast('Action removed');
   }catch(e){alert('Error.');}
+}
+
+// QUICK ACTION
+let qaAppId=null;
+
+function openQuickAction(appId,company,role){
+  qaAppId=appId;
+  document.getElementById('qa-title').textContent='Add action — '+company+(role?' · '+role:'');
+  document.getElementById('qa-date').value=new Date().toISOString().split('T')[0];
+  document.getElementById('qa-type').value='';
+  document.getElementById('qa-desc').value='';
+  document.getElementById('qa-contact').value='';
+  document.getElementById('qa-scheduled-note').style.display='none';
+  document.getElementById('quick-action-ov').classList.add('open');
+  setTimeout(()=>document.getElementById('qa-type').focus(),80);
+}
+
+document.addEventListener('change',ev=>{
+  if(ev.target.id==='qa-date'){
+    const isF=ev.target.value>new Date().toISOString().split('T')[0];
+    document.getElementById('qa-scheduled-note').style.display=isF?'block':'none';
+    if(isF&&!document.getElementById('qa-type').value)document.getElementById('qa-type').value='Task';
+  }
+});
+
+async function saveQuickAction(){
+  const date=document.getElementById('qa-date').value;
+  const type=document.getElementById('qa-type').value;
+  if(!date||!type){alert('Date and type are required.');return;}
+  const app=PD.find(x=>x.id===qaAppId);
+  const isScheduled=date>new Date().toISOString().split('T')[0];
+  const fields={
+    'Application ID':qaAppId,
+    'Company':app?.Company||'',
+    'Role':app?.Role||'',
+    'Date':date,
+    'Type':isScheduled?'📅 '+type:type,
+    'Description':document.getElementById('qa-desc').value.trim(),
+    'Contact':document.getElementById('qa-contact').value.trim()
+  };
+  const btn=document.getElementById('qa-save-btn');
+  btn.disabled=true;btn.textContent='Saving...';
+  try{
+    const r=await fetch(`${W}/api/actions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});
+    const d=await r.json();
+    closeModal('quick-action-ov');
+    toast(isScheduled?'Task scheduled ✓':'Action added ✓');
+  }catch(ex){alert('Error saving.');}
+  btn.disabled=false;btn.textContent='Save action';
 }
 
 // PDF
