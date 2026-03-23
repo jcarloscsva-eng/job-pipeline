@@ -240,6 +240,7 @@ textarea{resize:vertical;min-height:68px}
       <button class="fb" onclick="setFilter('No answer',this,'p')">No answer</button>
       <div class="tb-search"><span class="si">⌕</span><input placeholder="Search..." id="pipeline-search" oninput="renderPipeline()"></div>
       <button class="addbtn" onclick="openPipelineModal()">+ Add</button>
+      <button class="addbtn" onclick="openPdfModal()" style="background:linear-gradient(135deg,var(--sage-dk),#3a6b5e)">⬇ Report</button>
     </div>
     <!-- desktop table -->
     <div class="tbl-wrap" id="pipeline-table"></div>
@@ -360,18 +361,16 @@ textarea{resize:vertical;min-height:68px}
 
 <!-- PDF MODAL -->
 <div class="ov" id="pdf-ov" onclick="closeIfOutside(event,'pdf-ov')">
-  <div class="modal" style="max-width:480px">
-    <h3>Export activity report</h3>
-    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Actions grouped by application for the selected date range.</p>
-    <div class="pdf-range">
-      <label>From</label>
-      <input type="date" id="pdf-from">
-      <label>To</label>
-      <input type="date" id="pdf-to">
+  <div class="modal" style="max-width:420px">
+    <h3>Activity Report</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:20px">Select the period. The report will include all actions grouped by application.</p>
+    <div class="r2">
+      <div class="field"><label>From</label><input type="date" id="pdf-from"></div>
+      <div class="field"><label>To</label><input type="date" id="pdf-to"></div>
     </div>
     <div class="mf">
       <button class="bcl" onclick="closeModal('pdf-ov')">Cancel</button>
-      <button class="bsv" onclick="generatePdf()">Generate PDF</button>
+      <button class="bsv" id="pdf-gen-btn" onclick="generatePdf()">Export PDF</button>
     </div>
   </div>
 </div>
@@ -716,10 +715,12 @@ function openPdfModal(){
   const to=now.toISOString().split('T')[0];
   document.getElementById('pdf-from').value=from;
   document.getElementById('pdf-to').value=to;
+  closeModal('history-ov');
   document.getElementById('pdf-ov').classList.add('open');
 }
 
 async function generatePdf(){
+  const btn=document.getElementById('pdf-gen-btn');if(btn){btn.disabled=true;btn.textContent='Generating...';}
   const from=document.getElementById('pdf-from').value;
   const to=document.getElementById('pdf-to').value;
   if(!from||!to){alert('Please select a date range.');return;}
@@ -749,44 +750,62 @@ async function generatePdf(){
   const totalApps=Object.keys(grouped).length;
 
   let body=`<html><head><meta charset="UTF-8"><style>
-    body{font-family:Arial,sans-serif;color:#1E1C18;margin:40px;font-size:13px;line-height:1.6}
-    h1{font-size:20px;margin-bottom:4px;color:#1E1C18}
-    .sub{color:#6B6760;font-size:13px;margin-bottom:24px}
-    .summary{display:flex;gap:24px;margin-bottom:28px;padding:16px;background:#F7F6F3;border-radius:8px}
-    .sm-item{text-align:center}.sm-num{font-size:22px;font-weight:700;color:#2D5BE3}
-    .sm-lbl{font-size:11px;color:#6B6760;text-transform:uppercase;letter-spacing:.5px}
-    .app-block{margin-bottom:24px;border:1px solid #E4E1DA;border-radius:8px;overflow:hidden}
-    .app-header{background:#F7F6F3;padding:10px 14px;border-bottom:1px solid #E4E1DA}
-    .app-name{font-weight:700;font-size:14px}
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;color:#1E1C18;padding:48px 52px;font-size:13px;line-height:1.6;background:#fff}
+    .header{border-bottom:2px solid #1E1C18;padding-bottom:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:flex-end}
+    .header-left h1{font-size:22px;font-weight:700;letter-spacing:-.3px}
+    .header-left .period{font-size:12px;color:#6B6760;margin-top:3px}
+    .header-right{text-align:right;font-size:11px;color:#A09C95}
+    .summary{display:flex;gap:0;margin-bottom:32px;border:1px solid #E4E1DA;border-radius:8px;overflow:hidden}
+    .sm-item{flex:1;padding:14px 20px;border-right:1px solid #E4E1DA;text-align:center}
+    .sm-item:last-child{border-right:none}
+    .sm-num{font-size:24px;font-weight:700;color:#2D5BE3}
+    .sm-lbl{font-size:10px;color:#6B6760;text-transform:uppercase;letter-spacing:.6px;margin-top:2px}
+    .app-block{margin-bottom:20px;border:1px solid #E4E1DA;border-radius:8px;overflow:hidden;page-break-inside:avoid}
+    .app-header{background:#F7F6F3;padding:10px 16px;border-bottom:1px solid #E4E1DA;display:flex;align-items:center;gap:12px}
+    .app-name{font-weight:700;font-size:13px}
     .app-role{color:#6B6760;font-size:12px}
+    .app-count{margin-left:auto;font-size:10px;color:#A09C95;font-weight:600;text-transform:uppercase;letter-spacing:.4px}
     table{width:100%;border-collapse:collapse}
-    td{padding:8px 14px;border-bottom:1px solid #F0EDE8;font-size:12px;vertical-align:top}
+    td{padding:8px 16px;border-bottom:1px solid #F5F3EE;font-size:12px;vertical-align:top}
     tr:last-child td{border-bottom:none}
-    .badge{display:inline-block;padding:2px 8px;border-radius:12px;background:#FBF3E6;color:#C9A46B;font-size:10px;font-weight:700}
-    .date-col{color:#A09C95;white-space:nowrap;width:90px}
-    .contact-col{color:#6B6760;width:120px}
-    .footer{margin-top:32px;padding-top:12px;border-top:1px solid #E4E1DA;color:#A09C95;font-size:11px;text-align:center}
+    tr:nth-child(even) td{background:#FAFAF8}
+    .badge{display:inline-block;padding:2px 8px;border-radius:12px;background:#E8F5EE;color:#2D7A4F;font-size:10px;font-weight:700;white-space:nowrap}
+    .date-cell{color:#A09C95;white-space:nowrap;width:80px;font-size:11px}
+    .type-cell{width:130px}
+    .footer{margin-top:40px;padding-top:12px;border-top:1px solid #E4E1DA;color:#A09C95;font-size:10px;display:flex;justify-content:space-between}
+    @media print{body{padding:24px 32px}.app-block{page-break-inside:avoid}}
   </style></head><body>
-    <h1>Activity Report</h1>
-    <div class="sub">${fromFmt} to ${toFmt}</div>
+    <div class="header">
+      <div class="header-left">
+        <h1>Activity Report</h1>
+        <div class="period">${fromFmt} &rarr; ${toFmt}</div>
+      </div>
+      <div class="header-right">Juan Carlos Castillo<br>jcastillo.es</div>
+    </div>
     <div class="summary">
-      <div class="sm-item"><div class="sm-num">${totalActions}</div><div class="sm-lbl">Actions</div></div>
+      <div class="sm-item"><div class="sm-num">${totalActions}</div><div class="sm-lbl">Total actions</div></div>
       <div class="sm-item"><div class="sm-num">${totalApps}</div><div class="sm-lbl">Applications</div></div>
     </div>`;
 
   Object.values(grouped).forEach(g=>{
     body+=`<div class="app-block">
       <div class="app-header">
-        <div class="app-name">${e(g.company)}</div>
-        <div class="app-role">${e(g.role)}</div>
+        <div><div class="app-name">${e(g.company)}</div><div class="app-role">${e(g.role)}</div></div>
+        <div class="app-count">${g.actions.length} action${g.actions.length!==1?'s':''}</div>
       </div>
-      <table>`;
+      <table>
+        <tr style="background:#F7F6F3">
+          <td style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#A09C95;padding:6px 16px">Date</td>
+          <td style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#A09C95;padding:6px 16px">Type</td>
+          <td style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:#A09C95;padding:6px 16px">Description</td>
+        </tr>`;
     g.actions.forEach(a=>{
-      const dt=a.Date?new Date(a.Date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short'}):'';
+      const dt=a.Date?new Date(a.Date+'T12:00:00').toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'}):'';
       body+=`<tr>
-        <td class="date-col">${dt}</td>
-        <td><span class="badge">${e(a.Type||'')}</span> ${e(a.Description||'')}</td>
-        <td class="contact-col">${e(a.Contact||'')}</td>
+        <td class="date-cell">${dt}</td>
+        <td class="type-cell"><span class="badge">${e(a.Type||'')}</span></td>
+        <td>${e(a.Description||'')}${a.Contact?'<span style="color:#A09C95;font-size:11px"> &middot; '+e(a.Contact)+'</span>':''}</td>
       </tr>`;
     });
     body+=`</table></div>`;
@@ -800,6 +819,7 @@ async function generatePdf(){
   w.document.close();
   w.focus();
   setTimeout(()=>{w.print();},500);
+  if(btn){btn.disabled=false;btn.textContent='Export PDF';}
   closeModal('pdf-ov');
 }
 </script>
