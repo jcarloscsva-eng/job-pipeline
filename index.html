@@ -539,7 +539,10 @@ function openCompanyModal(id){
 
 async function saveCompanyEntry(){
   const co=document.getElementById('cf-company').value.trim();if(!co){alert('Company name is required.');return;}
-  const fields={'Company':co,'Sector':document.getElementById('cf-sector').value.trim(),'Revenue':document.getElementById('cf-revenue').value.trim(),'Employees':document.getElementById('cf-employees').value.trim(),'EMEA Presence':document.getElementById('cf-emea').value.trim(),'Status':document.getElementById('cf-status').value,'Jobs URL':document.getElementById('cf-jobs').value.trim(),'Notes':document.getElementById('cf-notes').value.trim()};
+  const revRaw=document.getElementById('cf-revenue').value.trim();
+  const empRaw=document.getElementById('cf-employees').value.trim();
+  const fields={'Company':co,'Sector':document.getElementById('cf-sector').value.trim(),'Revenue':revRaw!==''?parseFloat(revRaw)||revRaw:null,'Employees':empRaw!==''?parseFloat(empRaw)||empRaw:null,'EMEA Presence':document.getElementById('cf-emea').value.trim(),'Status':document.getElementById('cf-status').value,'Jobs URL':document.getElementById('cf-jobs').value.trim(),'Notes':document.getElementById('cf-notes').value.trim()};
+  Object.keys(fields).forEach(k=>{if(fields[k]===null||fields[k]==='')delete fields[k];});
   const b=document.getElementById('c-save-btn');b.disabled=true;b.textContent='Saving...';
   try{if(cEditId){const r=await fetch(`${W}/api/companies/${cEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});const d=await r.json();const i=CD.findIndex(x=>x.id===cEditId);CD[i]={...CD[i],id:cEditId,...d.fields};}
   else{const r=await fetch(`${W}/api/companies`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});const d=await r.json();CD.unshift({id:d.id,...d.fields});}
