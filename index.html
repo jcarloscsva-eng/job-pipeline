@@ -269,8 +269,8 @@ textarea{resize:vertical;min-height:68px}
       <div class="field"><label>Role *</label><input id="pf-role" placeholder="e.g. Engagement Manager"></div>
     </div>
     <div class="r2">
-      <div class="field"><label>Status</label><select id="pf-status"><option>Applied</option><option>Screening</option><option>Interview</option><option>Offer</option><option>Rejected</option><option>No answer</option></select></div>
-      <div class="field"><label>Channel</label><select id="pf-channel"><option>LinkedIn</option><option>Recruiter</option><option>Direct</option><option>Referral</option><option>Job board</option><option>Other</option></select></div>
+      <div class="field"><label>Status</label><select id="pf-status"><option value="Applied">Applied</option><option value="Screening">Screening</option><option value="Interview">Interview</option><option value="Offer">Offer</option><option value="Rejected">Rejected</option><option value="No answer">No answer</option></select></div>
+      <div class="field"><label>Channel</label><select id="pf-channel"><option value="LinkedIn">LinkedIn</option><option value="Recruiter">Recruiter</option><option value="Direct">Direct</option><option value="Referral">Referral</option><option value="Job board">Job board</option><option value="Other">Other</option></select></div>
     </div>
     <div class="r2">
       <div class="field"><label>Date applied</label><input type="date" id="pf-date"></div>
@@ -303,7 +303,7 @@ textarea{resize:vertical;min-height:68px}
     </div>
     <div class="r2">
       <div class="field"><label>EMEA Presence</label><input id="cf-emea" placeholder="e.g. Madrid / Dublin"></div>
-      <div class="field"><label>Status</label><select id="cf-status"><option value=""></option><option>Interesting</option><option>Watch</option><option>Contacted</option><option>Discarded</option></select></div>
+      <div class="field"><label>Status</label><select id="cf-status"><option value=""></option><option value="Interesting">Interesting</option><option value="Watch">Watch</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div>
     </div>
     <div class="field"><label>Jobs URL</label><input id="cf-jobs" placeholder="https://..."></div>
     <div class="field"><label>Notes</label><textarea id="cf-notes" placeholder="Context, contacts, open roles..."></textarea></div>
@@ -522,7 +522,8 @@ function openCompanyModal(id){
   document.getElementById('cm-title').textContent=cEditId?'Edit company':'Add company';
   if(cEditId){const r=CD.find(x=>x.id===cEditId);
     document.getElementById('cf-company').value=r['Company']||'';document.getElementById('cf-sector').value=r['Sector']||'';
-    document.getElementById('cf-revenue').value=r['Revenue']||'';document.getElementById('cf-employees').value=r['Employees']||'';
+    document.getElementById('cf-revenue').value=r['Revenue']!=null?String(r['Revenue']):'';document.getElementById('cf-employees').value=r['Employees']!=null?String(r['Employees']):'';
+
     document.getElementById('cf-emea').value=r['EMEA Presence']||'';document.getElementById('cf-status').value=r['Status']||'';
     document.getElementById('cf-jobs').value=r['Jobs URL']||'';document.getElementById('cf-notes').value=r['Notes']||'';
   }else{['cf-company','cf-sector','cf-revenue','cf-employees','cf-emea','cf-jobs','cf-notes'].forEach(i=>document.getElementById(i).value='');document.getElementById('cf-status').value='';}
