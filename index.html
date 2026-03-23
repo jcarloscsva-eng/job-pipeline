@@ -431,7 +431,7 @@ function renderCompanies(){
   const numCols=['Revenue','Employees'];
   rows.sort((a,b)=>{
     let av=a[cSortK],bv=b[cSortK];
-    if(numCols.includes(cSortK)){av=parseFloat(av)||0;bv=parseFloat(bv)||0;return cSortD*(bv-av);}
+    if(numCols.includes(cSortK)){av=parseFloat(av)||0;bv=parseFloat(bv)||0;return cSortD===-1?bv-av:av-bv;}
     av=String(av||'');bv=String(bv||'');
     return av<bv?cSortD:av>bv?-cSortD:0;
   });
