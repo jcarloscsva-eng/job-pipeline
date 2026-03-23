@@ -557,7 +557,13 @@ async function savePipelineEntry(){
   const btn=document.getElementById('p-save-btn');btn.disabled=true;btn.textContent='Saving...';
   try{
     if(pEditId){const r=await fetch(`${W}/api/records/${pEditId}`,{method:'PATCH',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});const d=await r.json();const i=PD.findIndex(x=>x.id===pEditId);PD[i]={...PD[i],id:pEditId,...d.fields};}
-    else{const r=await fetch(`${W}/api/records`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});const d=await r.json();PD.unshift({id:d.id,...d.fields});}
+    else{const r=await fetch(`${W}/api/records`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields})});const d=await r.json();const newEntry={id:d.id,...d.fields};PD.unshift(newEntry);
+      // Auto-create "Applied" action
+      if(fields['Date Applied']){
+        const af={'Application ID':d.id,'Company':fields['Company'],'Role':fields['Role'],'Date':fields['Date Applied'],'Type':'Applied','Description':'Application submitted','Contact':fields['Recruiter Name']||''};
+        fetch(`${W}/api/actions`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({fields:af})}).catch(()=>{});
+      }
+    }
     renderPipeline();closeModal('pipeline-ov');toast(pEditId?'Entry updated ✓':'Role added ✓');
   }catch(ex){alert('Error saving.');}
   btn.disabled=false;btn.textContent='Save';
