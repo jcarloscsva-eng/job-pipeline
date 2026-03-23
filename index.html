@@ -241,17 +241,14 @@ textarea{resize:vertical;min-height:68px}
     <div class="ph">
       <div class="ph-title">Companies <span id="companies-label">0 companies</span></div>
       <div class="stats">
-        <div class="stat"><strong id="sc-interesting">0</strong>Interesting</div>
-        <div class="stat"><strong id="sc-contacted">0</strong>Contacted</div>
-        <div class="stat"><strong id="sc-watch">0</strong>Watch</div>
+        <div class="stat"><strong id="sc-checked">0</strong>Checked</div>
+        <div class="stat"><strong id="sc-noroles">0</strong>No Open Roles</div>
       </div>
     </div>
     <div class="tb">
       <button class="fb active" onclick="setFilter('all',this,'c')">All</button>
-      <button class="fb" onclick="setFilter('Interesting',this,'c')">Interesting</button>
-      <button class="fb" onclick="setFilter('Watch',this,'c')">Watch</button>
-      <button class="fb" onclick="setFilter('Contacted',this,'c')">Contacted</button>
-      <button class="fb" onclick="setFilter('Discarded',this,'c')">Discarded</button>
+      <button class="fb" onclick="setFilter('Checked',this,'c')">Checked</button>
+      <button class="fb" onclick="setFilter('No Open Roles',this,'c')">No Open Roles</button>
       <div class="tb-search"><span class="si">⌕</span><input placeholder="Search..." id="company-search" oninput="renderCompanies()"></div>
       <button class="addbtn" onclick="openCompanyModal()">+ Add</button>
     </div>
@@ -303,7 +300,7 @@ textarea{resize:vertical;min-height:68px}
     </div>
     <div class="r2">
       <div class="field"><label>EMEA Presence</label><input id="cf-emea" placeholder="e.g. Madrid / Dublin"></div>
-      <div class="field"><label>Status</label><select id="cf-status"><option value=""></option><option value="Interesting">Interesting</option><option value="Watch">Watch</option><option value="Contacted">Contacted</option><option value="Discarded">Discarded</option></select></div>
+      <div class="field"><label>Status</label><select id="cf-status"><option value=""></option><option value="Checked">Checked</option><option value="No Open Roles">No Open Roles</option></select></div>
     </div>
     <div class="field"><label>Jobs URL</label><input id="cf-jobs" placeholder="https://..."></div>
     <div class="field"><label>Notes</label><textarea id="cf-notes" placeholder="Context, contacts, open roles..."></textarea></div>
@@ -322,7 +319,7 @@ let PD=[],CD=[],pEditId=null,cEditId=null,pFilter='all',cFilter='all';
 let pSortK='Date Applied',pSortD=-1,cSortK='Employees',cSortD=-1,gSearch='';
 
 const PS={Applied:{bg:'var(--sky-lt)',c:'var(--sky)'},Screening:{bg:'var(--amber-lt)',c:'var(--amber)'},Interview:{bg:'var(--sage-lt)',c:'var(--sage)'},Offer:{bg:'var(--plum-lt)',c:'var(--plum)'},Rejected:{bg:'var(--rose-lt)',c:'var(--rose)'},'No answer':{bg:'var(--slate-lt)',c:'var(--slate)'}};
-const CS={Interesting:{bg:'var(--sky-lt)',c:'var(--sky)'},Watch:{bg:'var(--amber-lt)',c:'var(--amber)'},Contacted:{bg:'var(--sage-lt)',c:'var(--sage)'},Discarded:{bg:'var(--rose-lt)',c:'var(--rose)'}};
+const CS={'Checked':{bg:'#E8F5EE',c:'#2D7A4F'},'No Open Roles':{bg:'#EAF2FB',c:'#2D5BE3'}};
 
 const SESSION_KEY='jp_auth';
 const SESSION_TTL=24*60*60*1000;
@@ -447,7 +444,8 @@ function renderCompanies(){
     const s=CS[r['Status']]||null;
     const badge=s?`<span class="badge" style="background:${s.bg};color:${s.c}">${e(r['Status'])}</span>`:'<span class="muted">—</span>';
     const lnk=r['Jobs URL']?`<a href="${e(r['Jobs URL'])}" target="_blank" class="lnk">Jobs ↗</a>`:'';
-    return`<tr><td><div class="cm">${e(r['Company']||'')}</div>${lnk?'<div class="cs">'+lnk+'</div>':''}</td>
+    const rowBg=r['Status']==='Checked'?'background:#E8F5EE':r['Status']==='No Open Roles'?'background:#EAF2FB':'';
+    return`<tr style="${rowBg}"><td><div class="cm">${e(r['Company']||'')}</div>${lnk?'<div class="cs">'+lnk+'</div>':''}</td>
     <td><span class="muted">${e(r['Sector']||'')}</span></td>
     <td><span class="mono">${e(r['Revenue']||'')}</span></td>
     <td><span class="muted">${e(r['Employees']||'')}</span></td>
@@ -458,9 +456,10 @@ function renderCompanies(){
   // Mobile cards
   cards.innerHTML=rows.map(r=>{
     const s=CS[r['Status']]||null;
+    const cardBg=r['Status']==='Checked'?'background:#E8F5EE;border-color:#B8DFC9':r['Status']==='No Open Roles'?'background:#EAF2FB;border-color:#C0D4F5':'';
     const badge=s?`<span class="badge" style="background:${s.bg};color:${s.c}">${e(r['Status'])}</span>`:'';
     const lnk=r['Jobs URL']?`<a href="${e(r['Jobs URL'])}" target="_blank" class="lnk">Jobs ↗</a>`:'';
-    return`<div class="card">
+    return`<div class="card" style="${cardBg}">
       <div class="card-top">
         <div><div class="card-name">${e(r['Company']||'')}${lnk?' '+lnk:''}</div><div class="card-sub">${e(r['Sector']||'')}</div></div>
         ${badge}
@@ -481,9 +480,8 @@ function renderCompanies(){
 
 function updateCompaniesStats(){
   document.getElementById('companies-label').textContent=CD.length+' companies';
-  document.getElementById('sc-interesting').textContent=CD.filter(r=>r['Status']==='Interesting').length;
-  document.getElementById('sc-contacted').textContent=CD.filter(r=>r['Status']==='Contacted').length;
-  document.getElementById('sc-watch').textContent=CD.filter(r=>r['Status']==='Watch').length;
+  document.getElementById('sc-checked').textContent=CD.filter(r=>r['Status']==='Checked').length;
+  document.getElementById('sc-noroles').textContent=CD.filter(r=>r['Status']==='No Open Roles').length;
 }
 
 function setFilter(f,b,t){
