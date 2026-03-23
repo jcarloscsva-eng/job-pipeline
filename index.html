@@ -428,7 +428,13 @@ function renderCompanies(){
   let rows=[...CD];
   if(cFilter!=='all')rows=rows.filter(r=>r['Status']===cFilter);
   if(q)rows=rows.filter(r=>(r['Company']||'').toLowerCase().includes(q)||(r['Sector']||'').toLowerCase().includes(q)||(r['EMEA Presence']||'').toLowerCase().includes(q)||(r['Notes']||'').toLowerCase().includes(q));
-  rows.sort((a,b)=>{let av=a[cSortK]||'',bv=b[cSortK]||'';return av<bv?cSortD:av>bv?-cSortD:0;});
+  const numCols=['Revenue','Employees'];
+  rows.sort((a,b)=>{
+    let av=a[cSortK],bv=b[cSortK];
+    if(numCols.includes(cSortK)){av=parseFloat(av)||0;bv=parseFloat(bv)||0;return cSortD*(bv-av);}
+    av=String(av||'');bv=String(bv||'');
+    return av<bv?cSortD:av>bv?-cSortD:0;
+  });
   const tbl=document.getElementById('companies-table');
   const cards=document.getElementById('companies-cards');
   if(!rows.length){tbl.innerHTML='<div class="empty">No companies found.</div>';cards.innerHTML='<div class="empty">No companies found.</div>';updateCompaniesStats();return;}
